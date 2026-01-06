@@ -63,7 +63,7 @@
 ### 1) Clone repository
 
 ```bash
-git clone <repo-url> && cd Google_E-commerce
+git clone https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git && cd Google_E-commerce
 ```
 
 ### 2) Backend setup
