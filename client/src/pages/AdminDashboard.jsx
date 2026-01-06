@@ -134,9 +134,15 @@ const AdminDashboard = () => {
         }
     }, [originalPrice, discount]);
 
-    const handleDeleteProduct = (id) => {
+    const handleDeleteProduct = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
-            dispatch(deleteProduct(id));
+            try {
+                await dispatch(deleteProduct(id)).unwrap();
+                // Optional: success notification
+            } catch (err) {
+                console.error('Failed to delete product:', err);
+                alert(`Failed to delete product: ${err.message || err}`);
+            }
         }
     };
 

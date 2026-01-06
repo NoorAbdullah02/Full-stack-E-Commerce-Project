@@ -1,10 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+const getUserInfoFromStorage = () => {
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+        try {
+            const parsedUser = JSON.parse(storedUserInfo);
+            // Check if token exists, strictly require it for new auth flow
+            if (parsedUser && parsedUser.token) {
+                return parsedUser;
+            }
+        } catch (err) {
+            return null;
+        }
+    }
+    return null;
+};
+
 const initialState = {
-    userInfo: localStorage.getItem('userInfo')
-        ? JSON.parse(localStorage.getItem('userInfo'))
-        : null,
+    userInfo: getUserInfoFromStorage(),
     loading: false,
     error: null,
     users: [],
