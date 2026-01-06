@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const SearchBar = () => {
+const SearchBar = ({ onSearch }) => {
     const [keyword, setKeyword] = useState('');
     const navigate = useNavigate();
 
@@ -12,6 +12,9 @@ const SearchBar = () => {
             navigate(`/products?keyword=${keyword}`);
         } else {
             navigate('/products');
+        }
+        if (onSearch) {
+            onSearch();
         }
     };
 

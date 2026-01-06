@@ -34,13 +34,13 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center space-x-3 group">
+                    <Link to="/" className="flex items-center space-x-3 group z-50 relative">
                         <div className="relative">
                             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-xl group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-110">
                                 <Sparkles className="w-5 h-5 text-white" />
                             </div>
                         </div>
-                        <span className="text-2xl font-bold text-gradient hidden sm:block">Nexora</span>
+                        <span className="text-2xl font-bold text-gradient">Nexora</span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -106,98 +106,107 @@ const Navbar = () => {
                                 <Link to="/login" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200">
                                     Login
                                 </Link>
-                                <Link to="/register" className="btn-primary text-sm">
+                                <Link to="/register" className="btn-primary text-sm whitespace-nowrap">
                                     Sign Up
                                 </Link>
                             </div>
                         )}
                     </div>
 
-                    {/* Mobile menu button */}
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                    >
-                        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
+                    {/* Mobile Menu Button - Visible on Mobile */}
+                    <div className="flex items-center gap-4 md:hidden">
+                        <Link to="/cart" className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors duration-200">
+                            <ShoppingCart className="w-6 h-6" />
+                            {cartItemCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                                    {cartItemCount}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 z-50 relative"
+                        >
+                            {isOpen ? <X className="w-6 h-6 text-gray-800" /> : <Menu className="w-6 h-6 text-gray-800" />}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Menu Overlay */}
+            <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-40 md:hidden transition-all duration-300 flex flex-col pt-24 px-6 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+                {/* Mobile Search */}
+                <div className="mb-6">
+                    <SearchBar onSearch={() => setIsOpen(false)} />
                 </div>
 
-                {/* Mobile Menu */}
-                {isOpen && (
-                    <div className="md:hidden py-4 space-y-2 animate-slide-down">
-                        <Link
-                            to="/"
-                            className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            Home
-                        </Link>
-                        <Link
-                            to="/products"
-                            className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            Products
-                        </Link>
-                        <Link
-                            to="/cart"
-                            className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            Cart ({cartItemCount})
-                        </Link>
-                        {userInfo ? (
-                            <>
+                <div className="space-y-2">
+                    <Link
+                        to="/"
+                        className="flex items-center p-4 text-lg font-medium text-gray-800 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all duration-200"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        Home
+                    </Link>
+                    <Link
+                        to="/products"
+                        className="flex items-center p-4 text-lg font-medium text-gray-800 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all duration-200"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        Products
+                    </Link>
+
+                    {userInfo ? (
+                        <>
+                            <Link
+                                to="/wishlist"
+                                className="flex items-center p-4 text-lg font-medium text-gray-800 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all duration-200"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Wishlist
+                            </Link>
+                            <Link
+                                to="/profile"
+                                className="flex items-center p-4 text-lg font-medium text-gray-800 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all duration-200"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Profile
+                            </Link>
+                            {userInfo.role === 'ADMIN' && (
                                 <Link
-                                    to="/wishlist"
-                                    className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
+                                    to="/admin"
+                                    className="flex items-center p-4 text-lg font-medium text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 rounded-2xl transition-all duration-200"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    Wishlist
+                                    Admin Dashboard
                                 </Link>
-                                <Link
-                                    to="/profile"
-                                    className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    Profile
-                                </Link>
-                                {userInfo.role === 'ADMIN' && (
-                                    <Link
-                                        to="/admin"
-                                        className="block px-4 py-2 text-indigo-600 font-semibold hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-                                        onClick={() => setIsOpen(false)}
-                                    >
-                                        Admin Dashboard
-                                    </Link>
-                                )}
-                                <button
-                                    onClick={() => { handleLogout(); setIsOpen(false); }}
-                                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 font-medium"
-                                >
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link
-                                    to="/login"
-                                    className="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors duration-200"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    to="/register"
-                                    className="block px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    Sign Up
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                )}
+                            )}
+                            <button
+                                onClick={() => { handleLogout(); setIsOpen(false); }}
+                                className="w-full flex items-center p-4 text-lg font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-200"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <div className="pt-4 grid grid-cols-2 gap-4">
+                            <Link
+                                to="/login"
+                                className="flex items-center justify-center p-4 text-lg font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-all duration-200"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                to="/register"
+                                className="flex items-center justify-center p-4 text-lg font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-lg rounded-2xl transition-all duration-200"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Sign Up
+                            </Link>
+                        </div>
+                    )}
+                </div>
             </div>
         </nav>
     );

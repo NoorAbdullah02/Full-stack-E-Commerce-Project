@@ -45,7 +45,7 @@ const Wishlist = () => {
                     <h2 className="text-3xl font-bold text-gray-900">Your wishlist is empty</h2>
                     <p className="text-gray-600 max-w-md">Save items you love for later. Start adding products to your wishlist!</p>
                     <Link to="/">
-                        <button className="btn-primary px-8 flex items-center gap-2 mx-auto">
+                        <button className="btn-primary px-6 sm:px-8 flex items-center gap-2 mx-auto">
                             Start Shopping
                             <ArrowRight className="w-5 h-5" />
                         </button>

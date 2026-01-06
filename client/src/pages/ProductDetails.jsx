@@ -323,7 +323,7 @@ const ProductDetails = () => {
                                                 required
                                             />
                                         </div>
-                                        <button type="submit" className="btn-primary px-8 py-3 rounded-xl">
+                                        <button type="submit" className="btn-primary px-4 sm:px-8 py-3 rounded-xl">
                                             Submit Review
                                         </button>
                                     </form>

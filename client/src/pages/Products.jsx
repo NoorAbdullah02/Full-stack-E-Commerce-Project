@@ -8,7 +8,7 @@ import { formatCurrency } from '../utils/currency';
 import StarRating from '../components/StarRating';
 import FilterSidebar from '../components/FilterSidebar';
 import SearchBar from '../components/SearchBar';
-import { Heart, ShoppingCart, SlidersHorizontal, Star } from 'lucide-react';
+import { Heart, ShoppingCart, SlidersHorizontal, Star, X } from 'lucide-react';
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -87,8 +87,26 @@ const Products = () => {
                 </div>
 
                 <div className="grid lg:grid-cols-4 gap-8">
-                    {/* Sidebar */}
-                    <div className={`lg:block ${showFilters ? 'block' : 'hidden'}`}>
+                    {/* Mobile Filter Overlay */}
+                    <div className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilters(false)}></div>
+                        <div className={`absolute right-0 top-0 bottom-0 w-[300px] bg-white p-6 shadow-2xl transition-transform duration-300 transform ${showFilters ? 'translate-x-0' : 'translate-x-full'}`}>
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold">Filters</h3>
+                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                                    <X className="w-6 h-6 text-gray-500" />
+                                </button>
+                            </div>
+                            <FilterSidebar
+                                filters={filters}
+                                setFilters={setFilters}
+                                className="h-full overflow-y-auto pb-20"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Desktop Sidebar */}
+                    <div className="hidden lg:block">
                         <FilterSidebar
                             filters={filters}
                             setFilters={setFilters}

@@ -88,17 +88,17 @@ const CartItem = ({ item, navigate }) => {
     };
 
     return (
-        <div className="glass rounded-2xl p-6 flex gap-6 items-center hover:shadow-lg transition-all duration-300">
-            <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 flex-shrink-0 cursor-pointer" onClick={() => navigate(`/product/${item.productId}`)}>
+        <div className="glass rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center hover:shadow-lg transition-all duration-300">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 flex-shrink-0 cursor-pointer" onClick={() => navigate(`/product/${item.productId}`)}>
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
             </div>
 
             <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2 truncate cursor-pointer hover:text-indigo-600" onClick={() => navigate(`/product/${item.productId}`)}>{item.name}</h3>
-                <p className="text-2xl font-bold text-gradient">{formatCurrency(item.price)}</p>
+                <p className="text-2xl sm:text-2xl font-bold text-gradient">{formatCurrency(item.price)}</p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                 <div className="flex items-center gap-2 glass rounded-xl p-1">
                     <button
                         onClick={handleDecrement}
@@ -116,8 +116,7 @@ const CartItem = ({ item, navigate }) => {
                         value={localQty}
                         onChange={handleInput}
                         onBlur={handleBlur}
-                        className={`w-12 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg ${isUpdating ? 'text-gray-400' : ''
-                            }`}
+                        className={`w-10 sm:w-12 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg ${isUpdating ? 'text-gray-400' : ''}`}
                     />
 
                     <button
@@ -130,22 +129,24 @@ const CartItem = ({ item, navigate }) => {
                     </button>
                 </div>
 
-                <div className="flex flex-col items-end gap-1">
-                    {item.stock && localQty >= item.stock && (
-                        <span className="text-[10px] text-amber-600 font-medium">Max stock</span>
-                    )}
-                    {localQty >= 10 && (
-                        <span className="text-[10px] text-indigo-600 font-medium">Max limit</span>
-                    )}
-                </div>
+                <div className="flex-1 sm:flex-none flex justify-between items-center">
+                    <div className="flex flex-col items-end gap-1 mr-2">
+                        {item.stock && localQty >= item.stock && (
+                            <span className="text-[10px] text-amber-600 font-medium">Max stock</span>
+                        )}
+                        {localQty >= 10 && (
+                            <span className="text-[10px] text-indigo-600 font-medium">Max limit</span>
+                        )}
+                    </div>
 
-                <button
-                    onClick={() => dispatch(removeFromCart(item.productId))}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                    title="Remove from cart"
-                >
-                    <Trash2 className="w-5 h-5" />
-                </button>
+                    <button
+                        onClick={() => dispatch(removeFromCart(item.productId))}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        title="Remove from cart"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -174,7 +175,7 @@ const Cart = () => {
                     <h2 className="text-3xl font-bold text-gray-900">Your cart is empty</h2>
                     <p className="text-gray-600 max-w-md">Looks like you haven't added anything to your cart yet. Start shopping to fill it up!</p>
                     <Link to="/">
-                        <button className="btn-primary px-8 flex items-center gap-2 mx-auto">
+                        <button className="btn-primary px-6 sm:px-8 flex items-center gap-2 mx-auto">
                             Continue Shopping
                             <ArrowRight className="w-5 h-5" />
                         </button>
@@ -201,7 +202,7 @@ const Cart = () => {
 
                     {/* Order Summary */}
                     <div className="fade-in-up delay-200">
-                        <div className="glass rounded-2xl p-8 sticky top-24 space-y-6">
+                        <div className="glass rounded-2xl p-6 sm:p-8 sm:sticky sm:top-24 space-y-6">
                             <h2 className="text-2xl font-bold">Order Summary</h2>
 
                             <div className="space-y-4 py-6 border-y border-gray-200">

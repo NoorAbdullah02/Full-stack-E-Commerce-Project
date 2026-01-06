@@ -41,7 +41,7 @@ const Newsletter = () => {
                                 className="input-glass flex-1 bg-white/50"
                                 required
                             />
-                            <button type="submit" className="btn-primary px-8 py-3 rounded-xl flex items-center justify-center gap-2">
+                            <button type="submit" className="btn-primary px-4 sm:px-8 py-3 rounded-xl flex items-center justify-center gap-2">
                                 <Send className="w-4 h-4" />
                                 Subscribe
                             </button>

@@ -47,29 +47,29 @@ const Home = () => {
                     <div className="absolute -bottom-32 left-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob delay-300"></div>
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                     <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-6 animate-fade-in">
                         <Sparkles className="w-4 h-4" />
                         <span className="text-sm font-medium">Welcome to the Future of Shopping</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-slide-up">
+                    <h1 className="text-4xl md:text-7xl font-bold mb-6 animate-slide-up leading-tight">
                         Discover Amazing
                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-pink-200">
                             Products
                         </span>
                     </h1>
 
-                    <p className="text-xl md:text-2xl mb-10 text-indigo-100 max-w-3xl mx-auto animate-slide-up delay-100">
+                    <p className="text-lg md:text-2xl mb-10 text-indigo-100 max-w-3xl mx-auto animate-slide-up delay-100 px-4">
                         Shop the latest trends with AI-powered recommendations and unbeatable prices
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-200">
-                        <a href="#products" className="inline-flex items-center justify-center bg-white text-indigo-600 font-semibold py-4 px-8 rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1">
+                        <a href="#products" className="inline-flex items-center justify-center bg-white text-indigo-600 font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1">
                             <Sparkles className="w-5 h-5 mr-2" />
                             Shop Now
                         </a>
-                        <a href="#features" className="inline-flex items-center justify-center glass text-white font-semibold py-4 px-8 rounded-xl hover:bg-white/20 transition-all duration-300">
+                        <a href="#features" className="inline-flex items-center justify-center glass text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-white/20 transition-all duration-300">
                             Learn More
                         </a>
                     </div>
@@ -182,7 +182,7 @@ const Home = () => {
 
                 {!loading && !error && products.length === 0 && (
                     <div className="text-center py-20">
-                        <div className="glass px-8 py-12 rounded-3xl inline-block">
+                        <div className="glass px-6 py-8 sm:px-8 sm:py-12 rounded-3xl inline-block">
                             <Sparkles className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-2xl font-bold text-gray-900 mb-2">No Products Yet</h3>
                             <p className="text-gray-600">Check back soon for amazing products!</p>
