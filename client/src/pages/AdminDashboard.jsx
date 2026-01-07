@@ -67,6 +67,7 @@ const AdminDashboard = () => {
         }
 
         // For file upload with FormData (if image is selected)
+        // Construction of FormData for BOTH Create and Update
         const data = new FormData();
         data.append('name', name);
         data.append('price', Number(price).toString());
@@ -79,17 +80,10 @@ const AdminDashboard = () => {
 
         try {
             if (isEditing) {
+                // If editing, we pass the FormData as productData
                 await dispatch(updateProduct({
                     id: editProductId,
-                    productData: {
-                        name,
-                        price,
-                        originalPrice,
-                        discount,
-                        description,
-                        stock,
-                        categoryId
-                    }
+                    productData: data // Pass FormData instad of JSON object
                 })).unwrap();
             } else {
                 await dispatch(createProduct(data)).unwrap();
@@ -574,6 +568,7 @@ const AdminDashboard = () => {
                                     <table className="w-full">
                                         <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
                                             <tr>
+                                                <th className="px-6 py-4 text-left font-semibold">Image</th>
                                                 <th className="px-6 py-4 text-left font-semibold">Name</th>
                                                 <th className="px-6 py-4 text-left font-semibold">Price</th>
                                                 <th className="px-6 py-4 text-left font-semibold">Stock</th>
@@ -583,6 +578,16 @@ const AdminDashboard = () => {
                                         <tbody>
                                             {products.map((product) => (
                                                 <tr key={product.id} className="border-b border-gray-100 hover:bg-white/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                                            <img
+                                                                src={product.images?.[0] || 'https://via.placeholder.com/150'}
+                                                                alt={product.name}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                                                            />
+                                                        </div>
+                                                    </td>
                                                     <td className="px-6 py-4 font-medium">{product.name}</td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex flex-col">

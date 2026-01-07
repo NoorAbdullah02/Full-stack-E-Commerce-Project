@@ -14,12 +14,13 @@ const upload = require('../utils/multer');
 router.route('/')
     .get(getProducts)
     .post(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), upload.array('images'), createProduct);
+// .post(upload.array('images'), createProduct); // TEMPORARY DEBUG: Auth disabled
 
 router.get('/categories', getCategories);
 
 router.route('/:id')
     .get(getProductById)
-    .put(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), updateProduct)
+    .put(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), upload.array('images'), updateProduct)
     .delete(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), deleteProduct);
 
 module.exports = router;

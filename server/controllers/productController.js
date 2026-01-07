@@ -120,9 +120,6 @@ const getProductById = async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = async (req, res) => {
-    console.log('POST /api/products called');
-    console.log('Body:', req.body);
-    console.log('Files:', req.files ? req.files.length : 'No files');
     try {
         const { name, price, description, categoryId, stock } = req.body;
 
@@ -160,29 +157,49 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const { name, price, description, categoryId, stock, images } = req.body;
+        const { name, price, description, categoryId, stock } = req.body;
+        // Check if we need to update images.
+        // Logic: 
+        // 1. If new files are uploaded -> Upload and replace/append? 
+        //    Current simple logic: Replace all images with new ones if uploaded.
+        // 2. If no new files -> Keep existing?
 
-        // Logic to handle images update (complex if mixing new uploads and existing URLs)
-        // For simplicity, assuming validation and replacement logic or keeping existing
-        // This part likely needs refinement based on frontend implementation
+        let imageUrls = undefined; // undefined means "do not update" in Prisma
+
+        if (req.files && req.files.length > 0) {
+            imageUrls = [];
+            for (const file of req.files) {
+                const result = await uploadToCloudinary(file.buffer);
+                imageUrls.push(result.secure_url);
+            }
+        }
+
+        // Construct update data
+        const updateData = {
+            name,
+            price: Number(price),
+            originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : null,
+            discount: req.body.discount ? Number(req.body.discount) : null,
+            description,
+            categoryId,
+            stock: Number(stock),
+        };
+
+        // Only add images to updateData if we have new ones
+        if (imageUrls) {
+            updateData.images = imageUrls;
+        }
 
         const product = await prisma.product.update({
             where: { id: req.params.id },
-            data: {
-                name,
-                price: Number(price),
-                originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : null,
-                discount: req.body.discount ? Number(req.body.discount) : null,
-                description,
-                categoryId,
-                stock: Number(stock),
-                // images logic to be added
-            },
+            data: updateData,
         });
 
         res.json(product);
     } catch (error) {
-        res.status(404).json({ message: 'Product not found' });
+        console.error('Update Product Error:', error);
+        res.status(500).json({ message: 'Failed to update product' }); // Changed status code to 500 for generic server errors, 404 handled by Prisma usually but 'where' check implies it exists? 
+        // Actually, let's keep the error handling robust.
     }
 };
 
