@@ -8,7 +8,8 @@ const getChatResponse = async (history, message) => {
     }
     try {
         const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash'
+            // model: 'gemini-2.0-flash'
+            model: "google/gemini-2.5-flash-lite",
         });
 
 
@@ -32,7 +33,8 @@ const getChatResponse = async (history, message) => {
 const generateProductDescription = async (productName, category) => {
     try {
         const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash'
+            // model: 'gemini-2.0-flash'
+            model: "google/gemini-2.5-flash-lite",
         }); const prompt = `Write a compelling and SEO-friendly product description for a ${category} product named "${productName}". Highlight its key features and benefits in a professional tone.`;
 
         const result = await model.generateContent(prompt);

@@ -1,226 +1,161 @@
-# Nexora — AI-Powered E-commerce (Full-Stack)
+# 🛍️ Nexora — AI-Powered E-commerce Platform
 
-> A modern, responsive e-commerce web app built with React (Vite) + Tailwind on the frontend and Node/Express + Prisma/Postgres on the backend. Includes AI features, PDF invoice generation, file uploads (Cloudinary), and robust auth workflows.
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![Backend](https://img.shields.io/badge/backend-Node.js%20%7C%20Express-blue.svg)]()
+[![Frontend](https://img.shields.io/badge/frontend-React%20%7C%20Vite-blueviolet.svg)]()
+[![Database](https://img.shields.io/badge/database-PostgreSQL%20%7C%20Prisma-lightblue.svg)]()
 
----
-
-## 🚀 Quick Overview
-
-- Name: **Nexora**
-- Architecture: **React (Vite) front-end** + **Node/Express back-end** with **Prisma** (Postgres DB)
-- Styling: **Tailwind CSS**
-- Key features: product catalog, filters, cart, checkout, orders, user auth, reviews, wishlist, admin dashboard, AI chat & recommendations, invoice generation
+**Nexora** is a cutting-edge, full-stack e-commerce solution designed with a focus on premium user experience, AI-driven automation, and robust administrative control. Built using the modern PERN stack (PostgreSQL, Express, React, Node), it features seamless integrations for AI assistance, secure payments, and dynamic content management.
 
 ---
 
-## 🧭 Repo Structure (high level)
+## ✨ Key Features
 
-- client/ — React frontend (Vite)
-  - src/ — app source (components, pages, redux slices)
-  - public/
-  - package.json
-- server/ — Express backend
-  - controllers/, services/, routes/, middleware/, prisma/ (schema + seeds)
-  - server.js
-  - package.json
+### 👤 User Experience
+- **Dynamic Catalog**: Intelligent product discovery with advanced filtering, sorting, and categories.
+- **Smart Recommendations**: AI-powered product suggestions tailored to user interests.
+- **Secure Auth**: Full authentication suite including JWT-based login, registration, and OTP-based password resets.
+- **Wishlist & Cart**: Persistent shopping cart and wishlist functionality for a smooth shopping journey.
+- **Order Tracking**: Real-time status updates for placed orders with PDF invoice generation.
+- **Product Reviews**: Interactive review system with helpfulness tracking.
 
----
+### 🤖 AI Integration (Gemini 2.0)
+- **AI Chatbot**: Real-time support to help users find products and answers.
+- **Auto-Content**: AI-generated SEO-friendly product descriptions for administrators.
 
-## 🔧 Tech Stack
-
-- Frontend: React + Vite, React Router, Redux Toolkit, Tailwind CSS
-- Backend: Node.js + Express, Prisma ORM, PostgreSQL
-- Other: Cloudinary (image uploads), Brevo (email), Google Generative AI (Gemini) integrations, PDFKit, Winston logging
-
----
-
-## 🧩 Features
-
-- Fully-featured product listing with categories, sorting, and filters
-- Cart and checkout flow with order summary and invoice generation
-- User accounts, authentication, password reset, email notifications
-- Wishlist and recently viewed items
-- Reviews with rating, helpful / not helpful tracking
-- Admin dashboard (CRUD for products, categories, orders)
-- AI-powered components (chat/recommendations)
-- Responsive UI with mobile-first styles (Tailwind)
+### 🔐 Administrative Control
+- **Powerful Dashboard**: Comprehensive CRUD operations for Products, Categories, and Orders.
+- **Sales Analytics**: Visual representation of sales data and order trends using Recharts.
+- **Image Management**: Seamless file uploads integrated with Cloudinary.
 
 ---
 
-## ⚙️ Prerequisites
+## 🛠️ Tech Stack
 
-- Node.js (v18+ recommended)
-- npm or yarn
-- PostgreSQL (or a hosted DB like Supabase / ElephantSQL)
-- Cloudinary account (optional — for file uploads)
-- Brevo (formerly Sendinblue) API key (optional — for emails)
-- Google Gemini key (optional — for AI features)
+| Component | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, Vite, Redux Toolkit, Tailwind CSS, Lucide Icons |
+| **Backend** | Node.js, Express, Prisma ORM, JWT, Winston Logging |
+| **Database** | PostgreSQL |
+| **Integrations** | Google Gemini AI, Cloudinary (Media), Brevo (Email), PDFKit (Invoices) |
 
 ---
 
-## 🛠️ Local Setup (Development)
+## 🧭 Repository Structure
 
-### 1) Clone repository
-
-```bash
-git clone https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git && cd Google_E-commerce
+```cmd
+.
+├── client/                 # Frontend React application (Vite)
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Page-level components
+│   │   ├── store/          # Redux Toolkit state management
+│   │   └── utils/          # Frontend utility functions
+│   └── public/             # Static assets
+├── server/                 # Backend Node/Express application
+│   ├── controllers/        # Request handling logic
+│   ├── services/           # Business logic (AI, Email, PDF)
+│   ├── routes/             # API endpoint definitions
+│   ├── prisma/             # Database schema and seed files
+│   └── middleware/         # Auth and error-handling middleware
+└── README.md
 ```
 
-### 2) Backend setup
+---
 
-- Move into server
+## 🚀 Getting Started
 
+### Prerequisites
+- **Node.js**: v18 or higher.
+- **PostgreSQL**: A local instance or a cloud provider (e.g., Supabase).
+- **External Accounts**: Cloudinary (Image storage), Brevo (Emailing), and Google AI Studio (Gemini API).
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git
+cd Full-stack-E-Commerce-Project
+```
+
+### 2. Backend Setup
 ```bash
 cd server
 npm install
 ```
+Create a `.env` file in `server/` with the following:
+```env
+PORT=4000
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+JWT_SECRET=your_jwt_secret
+FRONTEND_URL=http://localhost:5173
 
-- Create a `.env` file (see example below) or copy `.env.example` and set values.
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
 
-- Initialize / Migrate DB (Prisma)
+BREVO_API_KEY=...
+BREVO_SENDER_EMAIL=...
+BREVO_SENDER_NAME="Nexora Support"
 
+GEMINI_API_KEY=...
+```
+Initialize the database:
 ```bash
-# generate client
 npm run prisma:generate
-# push schema to DB (safe for development)
 npm run prisma:push
-```
-
-- Seed (optional)
-
-```bash
+# Optional: Seed the database
 node prisma/seed.js
-node prisma/seedAdmin.js
-node prisma/seedProducts.js
 ```
-
-- Run server
-
+Start the server:
 ```bash
 npm run dev
-# server listens at http://localhost:4000 by default
 ```
 
-### 3) Frontend setup
-
-- Move into client
-
+### 3. Frontend Setup
 ```bash
 cd ../client
 npm install
 ```
-
-- Copy `.env.example` → `.env` and set `VITE_BACKEND_URL` (e.g. `http://localhost:4000`)
-
-- Run dev server
-
-```bash
-npm run dev
-# open http://localhost:5173
-```
-
----
-
-## 🧾 Example environment variables
-
-server/.env (example)
-
-```text
-PORT=4000
-NODE_ENV=development
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public
-JWT_SECRET=your_jwt_secret_here
-FRONTEND_URL=http://localhost:5173
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-BREVO_API_KEY=...
-BREVO_SENDER_EMAIL=...
-BREVO_SENDER_NAME=...
-GEMINI_API_KEY=... # for AI features
-```
-
-client/.env (example)
-
-```text
+Create a `.env` file in `client/` with:
+```env
 VITE_BACKEND_URL=http://localhost:4000
 ```
-
-> Store secrets safely (do not commit .env with real credentials).
-
----
-
-## ✅ Scripts
-
-- Client
-  - `npm run dev` — start Vite dev server
-  - `npm run build` — produce production build
-  - `npm run preview` — preview production build
-  - `npm run lint` — run ESLint
-
-- Server
-  - `npm run dev` — start server with nodemon
-  - `npm start` — start server (production)
-  - `npm run prisma:generate` / `npm run prisma:push`
+Start the application:
+```bash
+npm run dev
+```
 
 ---
 
-## 📦 Deployment tips
+## 🧪 Development Scripts
 
-- Build client (`npm run build`), then host on Netlify/Vercel or serve the static `dist` from a static server or combined with Express static middleware.
-- For production backend, set `NODE_ENV=production` and provide secure `DATABASE_URL`, `JWT_SECRET`, and other service keys.
-- Attach proper CORS origin values (see `server/server.js`).
-
----
-
-## 🧪 Testing & QA
-
-- Manual testing: Use browser devtools to test common breakpoints (320/375/412/768px) and ensure no horizontal overflow.
-- Linting: `npm run lint` (client) — fix issues flagged by ESLint.
+| Command | Action |
+| :--- | :--- |
+| `npm run dev` | Starts development server (Client or Server) |
+| `npm run build` | Generates optimized production build (Client) |
+| `npm start` | Starts production server (Server) |
+| `npm run lint` | Runs ESLint for code quality checks |
 
 ---
 
-## 🧰 Troubleshooting (common fixes)
-
-- "Blank page or CORS errors": ensure `VITE_BACKEND_URL` matches the server origin and server allows that origin.
-- "Database connection issues": confirm `DATABASE_URL` and run `npx prisma db pull` / `prisma:push`.
-- "Images not uploading": verify Cloudinary keys and allowed file sizes in `server/config/cloudinary.js`.
-- "Mobile layout issues": open DevTools (Device Toolbar) and inspect which component has long fixed widths or missing responsive classes; the project uses Tailwind utility classes for responsive behavior.
-
----
-
-## ♿ Accessibility & Responsiveness
-
-- Uses Tailwind's responsive utilities (`sm:`, `md:`, `lg:`) and avoids fixed horizontal widths where possible.
-- If you find a layout issue on a particular page, please open an issue or attach a screenshot and viewport size.
-
----
-
-## 📈 Roadmap & Improvements
-
-- Add automated UI tests (Cypress / Playwright)
-- Improve accessibility audits (axe)
-- Add image optimization & caching for production
-- Add CI workflows for tests, linting, and deployment
-
----
+## 🛡️ Security & Performance
+- **Data Protection**: Input validation and secure headers (Helmet).
+- **Logging**: Production-grade logging with Winston.
+- **Responsiveness**: Mobile-first design using Tailwind CSS utility classes.
+- **Auth**: Secure password hashing with Bcrypt and stateless JWT authentication.
 
 ## 🤝 Contributing
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-Contributions welcome! Please open issues for bugs or feature requests and send PRs against `main` with clear descriptions and tests if applicable.
-
----
-
-## 📞 Contact
-
-If you need help running or customizing the project, open an issue or reach out to the repo owner.
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
 ## 📜 License
-
-This project is provided as-is. Add a license file (e.g., MIT) if you intend to publish.
+Internal use only. Please contact the repository owner for licensing details.
 
 ---
-
-Happy hacking! 🛍️
+*Made with ❤️ for high-performance e-commerce.*

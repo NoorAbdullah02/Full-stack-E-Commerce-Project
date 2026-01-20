@@ -1,0 +1,21 @@
+{
+  "name": "google_e-commerce",
+  "version": "1.0.0",
+  "description": "[![Status](https://img.shields.io/badge/status-active-success.svg)]() [![Backend](https://img.shields.io/badge/backend-Node.js%20%7C%20Express-blue.svg)]() [![Frontend](https://img.shields.io/badge/frontend-React%20%7C%20Vite-blueviolet.svg)]() [![Database](https://img.shields.io/badge/database-PostgreSQL%20%7C%20Prisma-lightblue.svg)]()",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project/issues"
+  },
+  "homepage": "https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project#readme"
+}
