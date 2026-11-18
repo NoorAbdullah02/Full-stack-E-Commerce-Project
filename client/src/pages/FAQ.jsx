@@ -46,7 +46,7 @@ const FAQ = () => {
                             >
                                 <span className="font-semibold text-gray-900">{faq.question}</span>
                                 {openIndex === index ? (
-                                    <ChevronUp className="w-5 h-5 text-indigo-600" />
+                                    <ChevronUp className="w-5 h-5 text-emerald-600" />
                                 ) : (
                                     <ChevronDown className="w-5 h-5 text-gray-400" />
                                 )}

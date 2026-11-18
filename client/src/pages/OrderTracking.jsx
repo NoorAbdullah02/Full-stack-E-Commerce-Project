@@ -122,7 +122,7 @@ const OrderTracking = () => {
     return (
         <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-8">
-                <Link to="/profile" className="inline-flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors">
+                <Link to="/profile" className="inline-flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition-colors">
                     <ChevronLeft className="w-5 h-5" /> Back to Orders
                 </Link>
 
@@ -137,7 +137,7 @@ const OrderTracking = () => {
                         <div className="flex items-center gap-3">
                             <div className={`px-4 py-2 rounded-full font-medium text-sm border ${order.status === 'CANCELLED'
                                     ? 'bg-red-50 text-red-700 border-red-100'
-                                    : 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                 }`}>
                                 Status: {order.status}
                             </div>
@@ -170,7 +170,7 @@ const OrderTracking = () => {
                     <div className="relative mb-12 px-4">
                         <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
                         <div
-                            className="absolute top-1/2 left-0 h-1 bg-indigo-600 -z-10 rounded-full transition-all duration-1000 ease-out"
+                            className="absolute top-1/2 left-0 h-1 bg-emerald-600 -z-10 rounded-full transition-all duration-1000 ease-out"
                             style={{ width: `${progress}%` }}
                         ></div>
 
@@ -183,12 +183,12 @@ const OrderTracking = () => {
                                 return (
                                     <div key={step.status} className="flex flex-col items-center gap-2">
                                         <div className={`w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all bg-white ${isActive
-                                            ? 'border-indigo-600 text-indigo-600 scale-110'
+                                            ? 'border-emerald-600 text-emerald-700 scale-110 shadow-sm'
                                             : 'border-gray-200 text-gray-300'
                                             }`}>
                                             <Icon className="w-5 h-5" />
                                         </div>
-                                        <span className={`text-xs font-medium ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>
+                                        <span className={`text-xs font-semibold ${isActive ? 'text-emerald-800' : 'text-gray-400'}`}>
                                             {step.label}
                                         </span>
                                     </div>

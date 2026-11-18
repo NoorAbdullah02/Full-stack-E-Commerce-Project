@@ -292,7 +292,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('analytics')}
                         className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'analytics'
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
                             : 'text-gray-700 hover:bg-white/50'
                             }`}
                     >
@@ -302,7 +302,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('products')}
                         className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'products'
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
                             : 'text-gray-700 hover:bg-white/50'
                             }`}
                     >
@@ -312,7 +312,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('orders')}
                         className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'orders'
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
                             : 'text-gray-700 hover:bg-white/50'
                             }`}
                     >
@@ -322,7 +322,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('users')}
                         className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'users'
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
                             : 'text-gray-700 hover:bg-white/50'
                             }`}
                     >
@@ -353,31 +353,31 @@ const AdminDashboard = () => {
                             <div className="glass rounded-2xl p-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm text-gray-600">Total Orders</p>
-                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <ShoppingCart className="w-5 h-5 text-indigo-600" />
+                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                        <ShoppingCart className="w-5 h-5 text-emerald-700" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold text-indigo-600">{orders?.length || 0}</p>
+                                <p className="text-3xl font-bold text-emerald-700">{orders?.length || 0}</p>
                                 <p className="text-xs text-gray-500 mt-1">Total placed</p>
                             </div>
                             <div className="glass rounded-2xl p-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm text-gray-600">Total Products</p>
-                                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                        <Package className="w-5 h-5 text-purple-600" />
+                                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                                        <Package className="w-5 h-5 text-teal-700" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold text-purple-600">{products?.length || 0}</p>
+                                <p className="text-3xl font-bold text-teal-700">{products?.length || 0}</p>
                                 <p className="text-xs text-gray-500 mt-1">In catalog</p>
                             </div>
                             <div className="glass rounded-2xl p-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm text-gray-600">Total Users</p>
-                                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                        <User className="w-5 h-5 text-pink-600" />
+                                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                                        <User className="w-5 h-5 text-amber-700" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold text-pink-600">{users?.length || 0}</p>
+                                <p className="text-3xl font-bold text-amber-700">{users?.length || 0}</p>
                                 <p className="text-xs text-gray-500 mt-1">Registered</p>
                             </div>
                         </div>
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
                             {/* Revenue Chart */}
                             <div className="glass rounded-2xl p-6">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <BarChart3 className="w-5 h-5 text-indigo-600" />
+                                    <BarChart3 className="w-5 h-5 text-emerald-600" />
                                     <h3 className="text-xl font-bold">Revenue Overview</h3>
                                 </div>
                                 <ResponsiveContainer width="100%" height={300}>
@@ -401,8 +401,8 @@ const AdminDashboard = () => {
                                     })()}>
                                         <defs>
                                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
-                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#059669" stopOpacity={0.8} />
+                                                <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -412,7 +412,7 @@ const AdminDashboard = () => {
                                             contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
                                             formatter={(value) => formatCurrency(value)}
                                         />
-                                        <Area type="monotone" dataKey="revenue" stroke="#6366f1" fillOpacity={1} fill="url(#colorRevenue)" />
+                                        <Area type="monotone" dataKey="revenue" stroke="#059669" fillOpacity={1} fill="url(#colorRevenue)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
@@ -420,7 +420,7 @@ const AdminDashboard = () => {
                             {/* Order Status Distribution */}
                             <div className="glass rounded-2xl p-6">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <PieChart className="w-5 h-5 text-purple-600" />
+                                    <PieChart className="w-5 h-5 text-teal-600" />
                                     <h3 className="text-xl font-bold">Order Status</h3>
                                 </div>
                                 <ResponsiveContainer width="100%" height={300}>
@@ -931,7 +931,7 @@ const AdminDashboard = () => {
                                 <div className="hidden lg:block glass rounded-2xl overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                                            <thead className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white">
                                                 <tr>
                                                     <th className="px-6 py-4 text-left font-semibold">Image</th>
                                                     <th className="px-6 py-4 text-left font-semibold">Name</th>
@@ -1009,8 +1009,8 @@ const AdminDashboard = () => {
                                         <p className="text-sm text-gray-600 mb-1">Total Orders</p>
                                         <p className="text-3xl font-bold text-gradient">{orders?.length || 0}</p>
                                     </div>
-                                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <ShoppingCart className="w-6 h-6 text-indigo-600" />
+                                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                                        <ShoppingCart className="w-6 h-6 text-emerald-600" />
                                     </div>
                                 </div>
                             </div>
@@ -1072,10 +1072,10 @@ const AdminDashboard = () => {
                             </div>
 
                             {selectedOrders.length > 0 && (
-                                <div className="mt-4 flex flex-wrap items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
-                                    <span className="font-semibold text-indigo-900">{selectedOrders.length} selected</span>
+                                <div className="mt-4 flex flex-wrap items-center gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                    <span className="font-semibold text-emerald-950">{selectedOrders.length} selected</span>
                                     <button onClick={() => handleBulkStatusUpdate('PROCESSING')} className="text-xs px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">Mark Processing</button>
-                                    <button onClick={() => handleBulkStatusUpdate('SHIPPED')} className="text-xs px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition">Mark Shipped</button>
+                                    <button onClick={() => handleBulkStatusUpdate('SHIPPED')} className="text-xs px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition">Mark Shipped</button>
                                     <button onClick={() => handleBulkStatusUpdate('DELIVERED')} className="text-xs px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">Mark Delivered</button>
                                     <button onClick={() => setSelectedOrders([])} className="text-xs px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">Clear Selection</button>
                                 </div>
@@ -1102,7 +1102,7 @@ const AdminDashboard = () => {
                                         </div>
                                     ) : (
                                         filteredOrders.map((order) => (
-                                            <div key={order.id} className="glass p-4 rounded-2xl border border-indigo-100 shadow-sm bg-white/95 space-y-3">
+                                            <div key={order.id} className="glass p-4 rounded-2xl border border-emerald-100 shadow-sm bg-white/95 space-y-3">
                                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                                     <div className="flex items-center gap-2">
                                                         <input
@@ -1115,9 +1115,9 @@ const AdminDashboard = () => {
                                                                     setSelectedOrders(selectedOrders.filter(id => id !== order.id));
                                                                 }
                                                             }}
-                                                            className="w-4 h-4 rounded text-indigo-600"
+                                                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                                                         />
-                                                        <span className="font-mono font-bold text-xs text-indigo-900">#{order.id.slice(0, 8)}</span>
+                                                        <span className="font-mono font-bold text-xs text-emerald-950">#{order.id.slice(0, 8)}</span>
                                                     </div>
                                                     <span className="text-[11px] text-gray-500 font-medium">
                                                         {new Date(order.createdAt).toLocaleDateString('en-BD')}
@@ -1134,7 +1134,7 @@ const AdminDashboard = () => {
                                                             {formatCurrency(order.total)}
                                                         </span>
                                                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                                                            order.transactionId ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                                                            order.transactionId ? 'bg-teal-100 text-teal-800' : 'bg-blue-100 text-blue-700'
                                                         }`}>
                                                             {order.transactionId ? 'bKash Trx' : 'Cash on Delivery'}
                                                         </span>
@@ -1142,9 +1142,9 @@ const AdminDashboard = () => {
                                                 </div>
 
                                                 {order.transactionId && (
-                                                    <div className="bg-indigo-50/70 p-2 rounded-xl text-xs flex justify-between items-center border border-indigo-100">
+                                                    <div className="bg-emerald-50/70 p-2 rounded-xl text-xs flex justify-between items-center border border-emerald-100">
                                                         <span className="text-gray-600 font-medium">bKash TrxID:</span>
-                                                        <span className="font-mono font-bold text-indigo-800">{order.transactionId}</span>
+                                                        <span className="font-mono font-bold text-emerald-900">{order.transactionId}</span>
                                                     </div>
                                                 )}
 
@@ -1203,7 +1203,7 @@ const AdminDashboard = () => {
                                 <div className="hidden lg:block glass rounded-2xl overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                                            <thead className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white">
                                                 <tr>
                                                     <th className="px-6 py-4 text-left font-semibold">
                                                         <input
@@ -1251,7 +1251,7 @@ const AdminDashboard = () => {
                                                         <td className="px-6 py-4 font-semibold text-gradient">{formatCurrency(order.total)}</td>
                                                         <td className="px-6 py-4">
                                                             <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.transactionId
-                                                                ? 'bg-purple-100 text-purple-700'
+                                                                ? 'bg-teal-100 text-teal-800'
                                                                 : 'bg-gray-100 text-gray-700'
                                                                 }`}>
                                                                 {order.transactionId ? '💳 Online' : '💵 COD'}
@@ -1259,7 +1259,7 @@ const AdminDashboard = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             {order.transactionId ? (
-                                                                <span className="font-mono text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 text-indigo-700">
+                                                                <span className="font-mono text-xs bg-emerald-50 px-2 py-1 rounded border border-emerald-200 text-emerald-800">
                                                                     {order.transactionId}
                                                                 </span>
                                                             ) : (
@@ -1346,7 +1346,7 @@ const AdminDashboard = () => {
                             <div className="glass rounded-2xl overflow-hidden">
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                                        <thead className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white">
                                             <tr>
                                                 <th className="px-6 py-4 text-left font-semibold">Name</th>
                                                 <th className="px-6 py-4 text-left font-semibold">Email</th>

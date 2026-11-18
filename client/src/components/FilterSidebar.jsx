@@ -65,7 +65,7 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
         <div className={`glass rounded-3xl p-6 space-y-8 ${className}`}>
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
-                    <SlidersHorizontal className="w-5 h-5 text-indigo-600" />
+                    <SlidersHorizontal className="w-5 h-5 text-emerald-600" />
                     Filters
                 </h3>
                 {Object.values(filters).some(val => val && val !== 1) && (
@@ -84,7 +84,7 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
                 <select
                     value={filters.sort || ''}
                     onChange={handleSortChange}
-                    className="w-full h-12 px-4 rounded-xl glass border border-white/20 bg-white/50 focus:border-indigo-500 outline-none text-sm"
+                    className="w-full h-12 px-4 rounded-xl glass border border-white/20 bg-white/50 focus:border-emerald-500 outline-none text-sm"
                 >
                     <option value="">Newest Arrivals</option>
                     <option value="price_asc">Price: Low to High</option>
@@ -102,10 +102,9 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
                     {categories.map((cat) => (
                         <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${filters.category === cat.id
-                                    ? 'bg-indigo-600 border-indigo-600'
-                                    : 'border-gray-300 group-hover:border-indigo-400'
+                                    ? 'bg-emerald-600 border-emerald-600'
+                                    : 'border-gray-300 group-hover:border-emerald-400'
                                 }`}>
-                                {filters.category === cat.id && <X className="w-3 h-3 text-white rotate-45" style={{ transform: 'none' }} children={<path d="M20 6L9 17l-5-5" />} />}
                                 {filters.category === cat.id && (
                                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -118,7 +117,7 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
                                 checked={filters.category === cat.id}
                                 onChange={() => handleCategoryChange(cat.id)}
                             />
-                            <span className={`text-sm ${filters.category === cat.id ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}>
+                            <span className={`text-sm ${filters.category === cat.id ? 'text-emerald-700 font-bold' : 'text-gray-600'}`}>
                                 {cat.name}
                             </span>
                         </label>
@@ -138,7 +137,7 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
                         value={priceRange.min}
                         onChange={handlePriceChange}
                         placeholder="Min"
-                        className="w-full px-3 py-2 rounded-xl glass border border-white/20 bg-white/50 text-sm outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 rounded-xl glass border border-white/20 bg-white/50 text-sm outline-none focus:border-emerald-500"
                     />
                     <span className="text-gray-400">-</span>
                     <input
@@ -147,7 +146,7 @@ const FilterSidebar = ({ filters, setFilters, className = '' }) => {
                         value={priceRange.max}
                         onChange={handlePriceChange}
                         placeholder="Max"
-                        className="w-full px-3 py-2 rounded-xl glass border border-white/20 bg-white/50 text-sm outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 rounded-xl glass border border-white/20 bg-white/50 text-sm outline-none focus:border-emerald-500"
                     />
                 </div>
                 <button

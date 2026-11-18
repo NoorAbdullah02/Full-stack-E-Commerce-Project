@@ -31,16 +31,16 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
             <div className="max-w-md w-full">
-                <Link to="/login" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 mb-8">
+                <Link to="/login" className="inline-flex items-center text-emerald-700 hover:text-emerald-800 font-semibold mb-8">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Login
                 </Link>
 
                 <div className="glass rounded-3xl p-8 shadow-xl">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
                             <Mail className="w-8 h-8 text-white" />
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
@@ -99,7 +99,7 @@ const ForgotPassword = () => {
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
                             Remember your password?{' '}
-                            <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+                            <Link to="/login" className="text-emerald-700 hover:text-emerald-800 font-bold">
                                 Sign in
                             </Link>
                         </p>

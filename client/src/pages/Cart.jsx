@@ -116,7 +116,7 @@ const CartItem = ({ item, navigate }) => {
                         value={localQty}
                         onChange={handleInput}
                         onBlur={handleBlur}
-                        className={`w-10 sm:w-12 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg ${isUpdating ? 'text-gray-400' : ''}`}
+                        className={`w-10 sm:w-12 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg ${isUpdating ? 'text-gray-400' : ''}`}
                     />
 
                     <button
@@ -135,7 +135,7 @@ const CartItem = ({ item, navigate }) => {
                             <span className="text-[10px] text-amber-600 font-medium">Max stock</span>
                         )}
                         {localQty >= 10 && (
-                            <span className="text-[10px] text-indigo-600 font-medium">Max limit</span>
+                            <span className="text-[10px] text-emerald-700 font-medium">Max limit</span>
                         )}
                     </div>
 
@@ -221,8 +221,8 @@ const Cart = () => {
                                     </span>
                                 </div>
                                 {subtotal < 5000 && (
-                                    <p className="text-sm text-gray-600 bg-indigo-50 p-3 rounded-lg">
-                                        Add {formatCurrency(5000 - subtotal)} more for free shipping!
+                                    <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200/60 p-3 rounded-xl font-medium">
+                                        Add {formatCurrency(5000 - subtotal)} more for free delivery nationwide!
                                     </p>
                                 )}
                             </div>

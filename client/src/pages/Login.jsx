@@ -30,10 +30,9 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             
             {/* Animated Background Blobs */}
-
-            <div className="absolute top-0 -left-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-            <div className="absolute top-0 -right-20 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob delay-200"></div>
-            <div className="absolute -bottom-32 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob delay-300"></div>
+            <div className="absolute top-0 -left-20 w-96 h-96 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+            <div className="absolute top-0 -right-20 w-96 h-96 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob delay-200"></div>
+            <div className="absolute -bottom-32 left-20 w-96 h-96 bg-green-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob delay-300"></div>
 
             <div className="glass max-w-md w-full p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 animate-scale-in">
                 {/* Logo/Icon */}
@@ -100,7 +99,7 @@ const Login = () => {
                     <div className="flex items-center justify-end">
                         <Link
                             to="/forgot-password"
-                            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium hover:underline transition-colors duration-200"
+                            className="text-sm text-emerald-700 hover:text-emerald-800 font-semibold hover:underline transition-colors duration-200"
                         >
                             Forgot Password?
                         </Link>
@@ -125,7 +124,7 @@ const Login = () => {
                         Don't have an account?{' '}
                         <Link
                             to={redirect ? `/register?redirect=${redirect}` : '/register'}
-                            className="text-indigo-600 hover:text-indigo-500 font-semibold hover:underline transition-colors duration-200"
+                            className="text-emerald-700 hover:text-emerald-800 font-bold hover:underline transition-colors duration-200"
                         >
                             Create Account
                         </Link>

@@ -49,22 +49,22 @@ const VerifyOTP = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
             <div className="max-w-md w-full">
-                <Link to="/forgot-password" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 mb-8">
+                <Link to="/forgot-password" className="inline-flex items-center text-emerald-700 hover:text-emerald-800 font-semibold mb-8">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
                 </Link>
 
                 <div className="glass rounded-3xl p-8 shadow-xl">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
                             <Shield className="w-8 h-8 text-white" />
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify OTP</h2>
                         <p className="text-gray-600">
                             Enter the 6-digit code sent to<br />
-                            <span className="font-semibold text-indigo-600">{email}</span>
+                            <span className="font-semibold text-emerald-700">{email}</span>
                         </p>
                     </div>
 
@@ -116,7 +116,7 @@ const VerifyOTP = () => {
                             <button
                                 onClick={handleResendOTP}
                                 disabled={resending}
-                                className="text-indigo-600 hover:text-indigo-700 font-semibold disabled:opacity-50"
+                                className="text-emerald-700 hover:text-emerald-800 font-bold disabled:opacity-50"
                             >
                                 {resending ? 'Sending...' : 'Resend OTP'}
                             </button>

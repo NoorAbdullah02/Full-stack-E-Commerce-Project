@@ -48,44 +48,47 @@ const Navbar = () => {
                 scrolled ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-emerald-100' : 'bg-white/90 backdrop-blur-sm'
             }`}>
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+                    <div className="flex justify-between items-center h-16 gap-4">
                         
-                        {/* Logo */}
-                        <Link to="/" className="flex items-center space-x-2.5 group">
-                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-300">
-                                <Sprout className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-xl sm:text-2xl font-black text-gradient tracking-tight">Green Petals</span>
-                        </Link>
+                        {/* Left: Logo & Desktop Navigation */}
+                        <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
+                            {/* Logo */}
+                            <Link to="/" className="flex items-center space-x-2.5 group flex-shrink-0">
+                                <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-300">
+                                    <Sprout className="w-5 h-5 text-white" />
+                                </div>
+                                <span className="text-xl sm:text-2xl font-black text-gradient tracking-tight whitespace-nowrap">Green Petals</span>
+                            </Link>
 
-                        {/* Desktop Navigation Links */}
-                        <nav className="hidden md:flex items-center space-x-6 text-sm">
-                            <Link to="/" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
-                                Home
-                            </Link>
-                            <Link to="/products" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
-                                Plants & Catalog
-                            </Link>
-                            <Link to="/about" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
-                                Nursery & Story
-                            </Link>
-                            <Link to="/contact" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
-                                Contact
-                            </Link>
-                            {(userInfo?.role === 'ADMIN' || userInfo?.role === 'SUPER_ADMIN') && (
-                                <Link to="/admin" className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition-colors">
-                                    Admin Panel
+                            {/* Desktop Navigation Links */}
+                            <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-sm flex-shrink-0">
+                                <Link to="/" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
+                                    Home
                                 </Link>
-                            )}
-                        </nav>
+                                <Link to="/products" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200 whitespace-nowrap">
+                                    Plants & Catalog
+                                </Link>
+                                <Link to="/about" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200 whitespace-nowrap">
+                                    Nursery & Story
+                                </Link>
+                                <Link to="/contact" className="text-gray-700 hover:text-emerald-600 font-semibold transition-colors duration-200">
+                                    Contact
+                                </Link>
+                                {(userInfo?.role === 'ADMIN' || userInfo?.role === 'SUPER_ADMIN') && (
+                                    <Link to="/admin" className="text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition-colors whitespace-nowrap">
+                                        Admin Panel
+                                    </Link>
+                                )}
+                            </nav>
+                        </div>
 
                         {/* Search Bar - Desktop */}
-                        <div className="hidden lg:block flex-1 max-w-xs mx-6">
+                        <div className="hidden lg:block flex-1 max-w-sm mx-2 xl:mx-6">
                             <SearchBar />
                         </div>
 
                         {/* Actions (Desktop) */}
-                        <div className="hidden md:flex items-center space-x-3">
+                        <div className="hidden md:flex items-center space-x-3 flex-shrink-0">
                             <Link to="/wishlist" className="relative p-2 text-gray-700 hover:text-rose-600 transition-colors" title="Wishlist">
                                 <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'text-rose-500 fill-rose-100' : ''}`} />
                                 {wishlistCount > 0 && (

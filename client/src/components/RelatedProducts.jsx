@@ -49,7 +49,7 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
                                 />
                             </div>
                             <div className="p-4">
-                                <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 truncate transition-colors">
+                                <h3 className="font-semibold text-gray-900 group-hover:text-emerald-700 truncate transition-colors">
                                     {product.name}
                                 </h3>
                                 <div className="flex items-center gap-1 my-1">

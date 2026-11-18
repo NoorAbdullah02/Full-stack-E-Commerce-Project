@@ -50,7 +50,7 @@ const UserDashboard = () => {
                     <div className="lg:col-span-1 fade-in-up">
                         <div className="glass rounded-2xl p-8 space-y-6">
                             <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                                <div className="w-20 h-20 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-emerald-500/25">
                                     {userInfo?.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -61,11 +61,11 @@ const UserDashboard = () => {
 
                             <div className="pt-6 border-t border-gray-200 space-y-3">
                                 <div className="flex items-center gap-3 text-gray-700">
-                                    <User className="w-5 h-5 text-indigo-600" />
+                                    <User className="w-5 h-5 text-emerald-600" />
                                     <span className="font-medium">Member since {new Date().getFullYear()}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-gray-700">
-                                    <Package className="w-5 h-5 text-indigo-600" />
+                                    <Package className="w-5 h-5 text-emerald-600" />
                                     <span className="font-medium">{orders?.length || 0} Orders</span>
                                 </div>
                             </div>

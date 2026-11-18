@@ -76,7 +76,7 @@ const SearchBar = ({ onSearch }) => {
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}
-                    placeholder="Search plants (e.g. Monstera, বেলি, Areca)..."
+                    placeholder="Search plants (e.g. Monstera, বেলি)..."
                     className="w-full h-11 sm:h-12 pl-11 pr-10 rounded-2xl glass border border-emerald-200/80 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/60 text-gray-800 placeholder-gray-400 text-xs sm:text-sm font-medium shadow-sm transition-all"
                 />
                 <button
