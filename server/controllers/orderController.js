@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { generateInvoicePDF } = require('../services/pdfService');
-const { sendEmail, sendOwnerNewOrderAlert } = require('../services/emailService');
+const { sendEmail, sendOwnerNewOrderAlert, sendDay7PlantCareReminder, sendDay30PlantCareReminder } = require('../services/emailService');
 
 // Helper function to generate beautiful order confirmation email
 const generateOrderEmailHTML = (order, user) => {
@@ -793,6 +793,170 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+// Helper to format WhatsApp Care Text
+const generateWhatsAppCareText = (order, type) => {
+    const customerName = order.user?.name || 'Customer';
+    const plantsList = order.items?.map(i => i.product?.name || 'Plant').join(', ') || 'চারাগাছ';
+    if (type === 'DAY_7') {
+        return `আসসালামু আলাইকুম ${customerName}! 🌿\n\nগ্রিন পেটালস (Green Petals) থেকে মুন্নার খানম বলছি। আপনার পছন্দের চারাগাছটি (${plantsList}) ডেলিভারি পাওয়ার আজ ৭ দিন হলো।\n\n🌱 ৭ দিনের বিশেষ যত্ন গাইড:\n১. চারাগাছটি এখনও কড়া রোদে না দিয়ে উজ্জ্বল পরোক্ষ আলো-বাতাসে রাখুন।\n২. মাটির ওপরের ১ ইঞ্চি শুকনা হলে পরিমিত পানি দিন (গোড়ায় পানি জমতে দেবেন না)।\n৩. স্প্রেয়ার দিয়ে পাতায় হালকা কুয়াশা স্প্রে করুন।\n\nকোনো সমস্যা বা পরামর্শের জন্য আমাকে সরাসরি কল বা মেসেজ দিন:\n📞 মুন্নার খানম: 01768686120\nGreen Petals Garden Centre, Barishal`;
+    } else {
+        return `আসসালামু আলাইকুম ${customerName}! 🌱\n\nগ্রিন পেটালস (Green Petals) থেকে মুন্নার খানম বলছি। আপনার চারাগাছটি (${plantsList}) ঘরে আনার আজ ১ মাস (৩০ দিন) পূর্ণ হলো! 🎉\n\n🌿 ৩০ দিনের পুষ্টি ও নতুন বৃদ্ধি গাইড:\n১. এখন চারার শিকড় সুদৃঢ় হয়েছে। টবের কিনার ঘেঁষে ১-২ চামচ ভার্মিকম্পোস্ট বা জৈব সার প্রয়োগ করুন।\n২. টবের ওপরের মাটি হালকা নিড়ানি দিয়ে আলগা করে দিন যাতে শিকড়ে পর্যাপ্ত অক্সিজেন পৌঁছায়।\n৩. শুকনো কোনো পাতা থাকলে ছেঁটে দিন।\n\nনতুন মৌসুমের সতেজ চারা দেখতে পারেন আমাদের ক্যাটালগে: greenpetals.com\n📞 হেল্পলাইন: 01768686120 (মুন্নার খানম)`;
+    }
+};
+
+// @desc    Send or log Day 7 or Day 30 plant care reminder
+// @route   POST /api/orders/:id/care-reminder
+// @access  Private/Admin
+const sendCareReminder = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const { type = 'DAY_7', channel = 'EMAIL' } = req.body;
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                user: true,
+                items: {
+                    include: { product: true }
+                }
+            }
+        });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        let emailResult = null;
+        if (channel === 'EMAIL' || channel === 'BOTH') {
+            if (type === 'DAY_7') {
+                emailResult = await sendDay7PlantCareReminder(order, order.user);
+            } else if (type === 'DAY_30') {
+                emailResult = await sendDay30PlantCareReminder(order, order.user);
+            }
+        }
+
+        // Update shippingAddress.careLogs in DB
+        let currentAddr = {};
+        if (order.shippingAddress) {
+            if (typeof order.shippingAddress === 'object') {
+                currentAddr = { ...order.shippingAddress };
+            } else if (typeof order.shippingAddress === 'string') {
+                try {
+                    currentAddr = JSON.parse(order.shippingAddress);
+                } catch {
+                    currentAddr = { address: order.shippingAddress };
+                }
+            }
+        }
+
+        const currentCareLogs = currentAddr.careLogs || {};
+        const nowIso = new Date().toISOString();
+        if (type === 'DAY_7') {
+            currentCareLogs.day7SentAt = nowIso;
+            currentCareLogs.day7Channel = channel;
+        } else if (type === 'DAY_30') {
+            currentCareLogs.day30SentAt = nowIso;
+            currentCareLogs.day30Channel = channel;
+        }
+        currentAddr.careLogs = currentCareLogs;
+
+        const updatedOrder = await prisma.order.update({
+            where: { id: order.id },
+            data: { shippingAddress: currentAddr },
+            include: {
+                user: true,
+                items: { include: { product: true } }
+            }
+        });
+
+        const whatsAppText = generateWhatsAppCareText(order, type);
+        const customerPhone = currentAddr.phone || order.user?.phone || '';
+
+        res.json({
+            message: `Day ${type === 'DAY_7' ? '7' : '30'} care reminder ${channel === 'EMAIL' ? 'emailed' : 'processed'} successfully`,
+            careLogs: currentCareLogs,
+            order: updatedOrder,
+            whatsAppText,
+            whatsAppUrl: customerPhone ? `https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsAppText)}` : null,
+            emailResult
+        });
+
+    } catch (error) {
+        console.error('Send Care Reminder Error:', error);
+        res.status(500).json({
+            message: 'Error sending care reminder',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// @desc    Get candidates for Day 7 and Day 30 care reminders
+// @route   GET /api/orders/care-reminders/candidates
+// @access  Private/Admin
+const getCareReminderCandidates = async (req, res) => {
+    try {
+        const deliveredOrders = await prisma.order.findMany({
+            where: { status: 'DELIVERED' },
+            include: {
+                user: { select: { id: true, name: true, email: true, phone: true } },
+                items: { include: { product: { select: { id: true, name: true, images: true } } } }
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        const now = Date.now();
+        const enriched = deliveredOrders.map(order => {
+            let addr = {};
+            if (order.shippingAddress) {
+                if (typeof order.shippingAddress === 'object') {
+                    addr = order.shippingAddress;
+                } else if (typeof order.shippingAddress === 'string') {
+                    try { addr = JSON.parse(order.shippingAddress); } catch { addr = {}; }
+                }
+            }
+            const careLogs = addr.careLogs || {};
+            const deliveredTime = new Date(order.updatedAt || order.createdAt).getTime();
+            const daysSinceDelivery = Math.max(0, Math.floor((now - deliveredTime) / (1000 * 60 * 60 * 24)));
+
+            const isDueForDay7 = daysSinceDelivery >= 6 && !careLogs.day7SentAt;
+            const isDueForDay30 = daysSinceDelivery >= 28 && !careLogs.day30SentAt;
+
+            return {
+                id: order.id,
+                orderNumber: order.id.slice(0, 8).toUpperCase(),
+                customerName: order.user?.name || 'Customer',
+                email: order.user?.email || addr.email,
+                phone: addr.phone || order.user?.phone,
+                deliveredAt: order.updatedAt,
+                daysSinceDelivery,
+                careLogs,
+                isDueForDay7,
+                isDueForDay30,
+                plants: order.items?.map(i => i.product?.name).filter(Boolean) || [],
+                day7WhatsAppUrl: addr.phone || order.user?.phone ? `https://wa.me/${(addr.phone || order.user?.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(generateWhatsAppCareText(order, 'DAY_7'))}` : null,
+                day30WhatsAppUrl: addr.phone || order.user?.phone ? `https://wa.me/${(addr.phone || order.user?.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(generateWhatsAppCareText(order, 'DAY_30'))}` : null
+            };
+        });
+
+        const dueDay7Count = enriched.filter(o => o.isDueForDay7).length;
+        const dueDay30Count = enriched.filter(o => o.isDueForDay30).length;
+
+        res.json({
+            totalDelivered: enriched.length,
+            dueDay7Count,
+            dueDay30Count,
+            candidates: enriched
+        });
+
+    } catch (error) {
+        console.error('Get Care Candidates Error:', error);
+        res.status(500).json({
+            message: 'Error fetching care reminder candidates',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 module.exports = {
     addOrderItems,
     getMyOrders,
@@ -801,4 +965,6 @@ module.exports = {
     updateOrderStatus,
     downloadInvoice,
     cancelOrder,
+    sendCareReminder,
+    getCareReminderCandidates,
 };

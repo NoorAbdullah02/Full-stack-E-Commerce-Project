@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getOrderDetails } from '../redux/slices/orderSlice';
 import { formatCurrency } from '../utils/currency';
 import { showSuccess, showError, showToast } from '../utils/alerts';
-import { Package, Truck, CheckCircle, Clock, MapPin, ChevronLeft, Download, XCircle } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, MapPin, ChevronLeft, Download, XCircle, Sprout, Phone } from 'lucide-react';
 import axios from 'axios';
 
 const OrderTracking = () => {
@@ -263,6 +263,88 @@ const OrderTracking = () => {
                                     <span>{formatCurrency(order.total)}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Post-Delivery Botanical Plant Care Guide */}
+                <div className="glass rounded-3xl p-6 sm:p-8 border-2 border-emerald-200/80 bg-gradient-to-br from-emerald-500/5 via-white to-teal-500/5 shadow-md">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-emerald-100">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <Sprout className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg sm:text-xl font-black text-gray-900">
+                                    🌱 গ্রিন পেটালস পোস্ট-ডেলিভারি চারাগাছ পরিচর্যা গাইড
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-500">
+                                    চারা পৌঁছানোর পর দীর্ঘস্থায়ী বৃদ্ধির ৩-ধাপের বৈজ্ঞানিক যত্ন রুটিন
+                                </p>
+                            </div>
+                        </div>
+                        <span className="self-start sm:self-auto text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-200">
+                            100% Viable Root Care
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Stage 1: Day 1-3 */}
+                        <div className="p-4 rounded-2xl bg-white border border-emerald-100 shadow-sm space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">১</span>
+                                <h4 className="font-bold text-sm text-gray-900">Day 1–3: আনবক্সিং ও হাইড্রেশন</h4>
+                            </div>
+                            <p className="text-xs text-gray-600 leading-relaxed">
+                                পার্সেল খুলে আলতোভাবে ময়েশ্চার-লক কাগজ সরান। কড়া রোদে না দিয়ে ছায়াযুক্ত কিন্তু বাতাস চলাচল করে এমন স্থানে রাখুন। শিকড়ে পরিমিত পানি স্প্রে করুন।
+                            </p>
+                        </div>
+
+                        {/* Stage 2: Day 7 */}
+                        <div className="p-4 rounded-2xl bg-white border border-teal-100 shadow-sm space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-xs">২</span>
+                                <h4 className="font-bold text-sm text-gray-900">Day 7: শিকড় থিতু হওয়া ও আলো</h4>
+                            </div>
+                            <p className="text-xs text-gray-600 leading-relaxed">
+                                উজ্জ্বল পরোক্ষ আলোতে রাখুন। মাটির ওপরের ১ ইঞ্চি শুকনা লাগলে পানি দিন। অতিরিক্ত পানি নিষ্কাশন নিশ্চিত করুন যেন গোড়ায় পানি জমে না থাকে।
+                            </p>
+                        </div>
+
+                        {/* Stage 3: Day 30 */}
+                        <div className="p-4 rounded-2xl bg-white border border-emerald-100 shadow-sm space-y-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">৩</span>
+                                <h4 className="font-bold text-sm text-gray-900">Day 30: প্রথম জৈব সার ও নতুন পাতা</h4>
+                            </div>
+                            <p className="text-xs text-gray-600 leading-relaxed">
+                                ১ মাস পর ১-২ চামচ ভার্মিকম্পোস্ট বা পাতা পচা সার টবের কিনার ঘেঁষে দিন। মাটি আলগা করে দিন এবং শুকনো পুরোনো পাতা সাবধানে ছেঁটে দিন।
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Helpline & WhatsApp support */}
+                    <div className="mt-6 pt-4 border-t border-emerald-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-emerald-50/60 p-4 rounded-2xl">
+                        <div className="text-xs text-gray-700">
+                            <strong>চারা নিয়ে যেকোনো সংশয় বা সাহায্যের প্রয়োজন?</strong><br/>
+                            প্রোপ্রাইটর মুন্নার খানম সরাসরি পরামর্শের জন্য প্রস্তুত আছেন।
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a
+                                href="https://wa.me/01768686120"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-primary text-xs py-2 px-3.5 rounded-xl flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] border-none shadow"
+                            >
+                                <Phone className="w-3.5 h-3.5" />
+                                <span>হোয়াটসঅ্যাপ কেয়ার</span>
+                            </a>
+                            <a
+                                href="tel:01768686120"
+                                className="btn-glass text-xs py-2 px-3.5 rounded-xl flex items-center gap-1.5 border border-emerald-300"
+                            >
+                                <span>কল: 01768686120</span>
+                            </a>
                         </div>
                     </div>
                 </div>

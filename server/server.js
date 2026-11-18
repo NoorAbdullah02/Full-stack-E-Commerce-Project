@@ -102,6 +102,7 @@ if (fs.existsSync(clientDistPath)) {
 
 // Error Handling Middleware
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
+const { initPlantCareScheduler } = require('./services/plantCareScheduler');
 
 app.use(notFound);
 app.use(errorHandler);
@@ -109,6 +110,7 @@ app.use(errorHandler);
 // Start Server
 app.listen(PORT, () => {
     console.log(`🌿 Green Petals Server running on port ${PORT}`);
+    initPlantCareScheduler();
 });
 
 // Graceful Custom Shutdown

@@ -635,6 +635,50 @@ Proprietor Hotline: 01768686120`;
         }
     };
 
+    // Helper to generate personalized Bengali plant care text
+    const getCareTextMessage = (order, type) => {
+        const customerName = order.user?.name || 'Customer';
+        const plantsList = order.items?.map(i => i.product?.name || 'Plant').join(', ') || 'চারাগাছ';
+        if (type === 'DAY_7') {
+            return `আসসালামু আলাইকুম ${customerName}! 🌿\n\nগ্রিন পেটালস (Green Petals) থেকে মুন্নার খানম বলছি। আপনার পছন্দের চারাগাছটি (${plantsList}) ডেলিভারি পাওয়ার আজ ৭ দিন হলো।\n\n🌱 ৭ দিনের বিশেষ যত্ন গাইড:\n১. চারাগাছটি এখনও কড়া রোদে না দিয়ে উজ্জ্বল পরোক্ষ আলো-বাতাসে রাখুন।\n২. মাটির ওপরের ১ ইঞ্চি শুকনা হলে পরিমিত পানি দিন (গোড়ায় পানি জমতে দেবেন না)।\n৩. স্প্রেয়ার দিয়ে পাতায় হালকা কুয়াশা স্প্রে করুন যাতে আর্দ্রতা বজায় থাকে।\n\nকোনো সমস্যা বা পরামর্শের জন্য আমাকে সরাসরি কল বা মেসেজ দিন:\n📞 মুন্নার খানম: 01768686120\nGreen Petals Garden Centre, Barishal`;
+        } else {
+            return `আসসালামু আলাইকুম ${customerName}! 🌱\n\nগ্রিন পেটালস (Green Petals) থেকে মুন্নার খানম বলছি। আপনার চারাগাছটি (${plantsList}) ঘরে আনার আজ ১ মাস (৩০ দিন) পূর্ণ হলো! 🎉\n\n🌿 ৩০ দিনের পুষ্টি ও নতুন বৃদ্ধি গাইড:\n১. এখন চারার শিকড় সুদৃঢ় হয়েছে। টবের কিনার ঘেঁষে ১-২ চামচ ভার্মিকম্পোস্ট বা জৈব সার প্রয়োগ করুন।\n২. টবের ওপরের মাটি হালকা নিড়ানি দিয়ে আলগা করে দিন যাতে শিকড়ে পর্যাপ্ত অক্সিজেন পৌঁছায়।\n৩. শুকনো কোনো পাতা থাকলে ছেঁটে দিন।\n\nনতুন মৌসুমের সতেজ চারা দেখতে পারেন আমাদের ক্যাটালগে: greenpetals.com\n📞 হেল্পলাইন: 01768686120 (মুন্নার খানম)`;
+        }
+    };
+
+    // Helper to get 1-Click WhatsApp care URL
+    const getWhatsAppCareUrl = (order, type) => {
+        const addr = parseAddress(order.shippingAddress);
+        const phone = addr?.phone || order.user?.phone;
+        if (!phone) return null;
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const text = getCareTextMessage(order, type);
+        return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+    };
+
+    // Helper to trigger care reminder via backend API
+    const handleSendCareReminder = async (orderId, type, channel = 'EMAIL') => {
+        try {
+            const token = userInfo?.token;
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}/care-reminder`,
+                { type, channel },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            showToast({
+                icon: 'success',
+                title: type === 'DAY_7' ? '৭ দিনের চারাগাছের যত্ন ইমেইল সফলভাবে পাঠানো হয়েছে!' : '৩০ দিনের পুষ্টি গাইড ইমেইল পাঠানো হয়েছে!'
+            });
+            dispatch(listAllOrders());
+            if (viewingOrder && viewingOrder.id === orderId) {
+                setViewingOrder(res.data.order);
+            }
+        } catch (err) {
+            console.error('Care reminder error:', err);
+            showError('ব্যর্থ হয়েছে', 'কেয়ার রিমাইন্ডার পাঠানো যায়নি।');
+        }
+    };
+
     // Export orders to CSV with complete address for Courier Bulk Upload
     const exportToCSV = () => {
         const csvData = filteredOrders.map(order => {
@@ -996,6 +1040,68 @@ Proprietor Hotline: 01768686120`;
                                     <span className="text-lg sm:text-xl font-black text-emerald-900">
                                         {orders?.filter(o => o.status === 'DELIVERED').length || 0}
                                     </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Plant Care & Customer Retention Radar */}
+                        <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-emerald-800">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-300">
+                                        <Sprout className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-sm sm:text-base text-white">
+                                            Post-Delivery Plant Care & Retention Radar (চারাগাছের যত্ন ও ফলো-আপ)
+                                        </h3>
+                                        <p className="text-xs text-emerald-300">
+                                            ৭ দিন (শিকড় সংস্থাপন) ও ৩০ দিন (জৈব পুষ্টি) পরিচর্যা মেসেজ ট্র্যাকার
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-bold bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-400/30 flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                        <span>Auto-Scheduler Active (12h)</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-center">
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <span className="text-[11px] text-emerald-200 block">Delivered Orders</span>
+                                    <span className="text-lg sm:text-2xl font-black text-white">{deliveredOrdersCount}</span>
+                                    <span className="text-[10px] text-emerald-300 block">সফল ডেলিভারি</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+                                    <span className="text-[11px] text-emerald-200 block">Day 7 Care Due</span>
+                                    <span className="text-lg sm:text-2xl font-black text-emerald-300">
+                                        {orders?.filter(o => {
+                                            if (o.status !== 'DELIVERED') return false;
+                                            const addr = parseAddress(o.shippingAddress);
+                                            const days = Math.floor((Date.now() - new Date(o.updatedAt || o.createdAt).getTime()) / 86400000);
+                                            return days >= 6 && !addr?.careLogs?.day7SentAt;
+                                        }).length || 0}
+                                    </span>
+                                    <span className="text-[10px] text-emerald-300 block">শিকড় স্ট্যাবিলাইজেশন</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-teal-500/15 border border-teal-500/30">
+                                    <span className="text-[11px] text-teal-200 block">Day 30 Care Due</span>
+                                    <span className="text-lg sm:text-2xl font-black text-teal-300">
+                                        {orders?.filter(o => {
+                                            if (o.status !== 'DELIVERED') return false;
+                                            const addr = parseAddress(o.shippingAddress);
+                                            const days = Math.floor((Date.now() - new Date(o.updatedAt || o.createdAt).getTime()) / 86400000);
+                                            return days >= 28 && !addr?.careLogs?.day30SentAt;
+                                        }).length || 0}
+                                    </span>
+                                    <span className="text-[10px] text-teal-300 block">জৈব পুষ্টি ও প্রুনিং</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-center items-center">
+                                    <span className="text-[11px] text-emerald-200 block">Proprietor Channel</span>
+                                    <span className="text-xs font-bold text-white mt-1">মুন্নার খানম</span>
+                                    <span className="text-[10px] text-emerald-300">01768686120</span>
                                 </div>
                             </div>
                         </div>
@@ -2027,6 +2133,18 @@ Proprietor Hotline: 01768686120`;
                                                                 type="button"
                                                                 onClick={() => {
                                                                     setViewingOrder(order);
+                                                                    setOrderModalView('care');
+                                                                }}
+                                                                className="p-1.5 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-xl transition-all flex items-center gap-1 font-bold text-xs"
+                                                                title="Post-Delivery Plant Care Reminders (যত্ন বার্তা)"
+                                                            >
+                                                                <Sprout className="w-4 h-4 text-emerald-700" />
+                                                                <span className="text-[11px]">Care</span>
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setViewingOrder(order);
                                                                     setOrderModalView('slip');
                                                                 }}
                                                                 className="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl transition-all"
@@ -2234,6 +2352,18 @@ Proprietor Hotline: 01768686120`;
                                                                         type="button"
                                                                         onClick={() => {
                                                                             setViewingOrder(order);
+                                                                            setOrderModalView('care');
+                                                                        }}
+                                                                        className="p-1.5 text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors flex items-center gap-1 font-bold text-xs"
+                                                                        title="Post-Delivery Plant Care Reminders (যত্ন বার্তা)"
+                                                                    >
+                                                                        <Sprout className="w-4 h-4 text-emerald-700" />
+                                                                        <span>Care</span>
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setViewingOrder(order);
                                                                             setOrderModalView('slip');
                                                                         }}
                                                                         className="p-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
@@ -2306,11 +2436,11 @@ Proprietor Hotline: 01768686120`;
                                                 </div>
 
                                                 {/* View Switcher Pills */}
-                                                <div className="mt-3 pt-3 border-t border-white/15 flex items-center gap-2">
+                                                <div className="mt-3 pt-3 border-t border-white/15 flex items-center gap-2 overflow-x-auto max-w-full scrollbar-none">
                                                     <button
                                                         type="button"
                                                         onClick={() => setOrderModalView('invoice')}
-                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                                                             orderModalView === 'invoice'
                                                                 ? 'bg-white text-emerald-900 shadow-md'
                                                                 : 'bg-white/15 text-white hover:bg-white/25'
@@ -2321,8 +2451,20 @@ Proprietor Hotline: 01768686120`;
                                                     </button>
                                                     <button
                                                         type="button"
+                                                        onClick={() => setOrderModalView('care')}
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                                                            orderModalView === 'care'
+                                                                ? 'bg-white text-emerald-900 shadow-md'
+                                                                : 'bg-white/15 text-white hover:bg-white/25'
+                                                        }`}
+                                                    >
+                                                        <Sprout className="w-3.5 h-3.5" />
+                                                        <span>Plant Care Tips (যত্ন বার্তা)</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={() => setOrderModalView('slip')}
-                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                                                             orderModalView === 'slip'
                                                                 ? 'bg-white text-emerald-900 shadow-md'
                                                                 : 'bg-white/15 text-white hover:bg-white/25'
@@ -2518,6 +2660,276 @@ Proprietor Hotline: 01768686120`;
                                                                     <Copy className="w-3.5 h-3.5" />
                                                                     <span>Copy Delivery Address</span>
                                                                 </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
+
+                                                {/* ================= PLANT CARE TIPS & RETENTION VIEW ================= */}
+                                                {orderModalView === 'care' && (() => {
+                                                    const addr = parseAddress(viewingOrder.shippingAddress);
+                                                    const phone = addr?.phone || viewingOrder.user?.phone || 'N/A';
+                                                    const customerName = viewingOrder.user?.name || 'Valued Customer';
+                                                    const careLogs = addr?.careLogs || {};
+                                                    const deliveredTime = new Date(viewingOrder.updatedAt || viewingOrder.createdAt).getTime();
+                                                    const daysSinceDelivery = Math.max(0, Math.floor((Date.now() - deliveredTime) / (1000 * 60 * 60 * 24)));
+                                                    const isDelivered = viewingOrder.status === 'DELIVERED';
+                                                    const day7Due = isDelivered && daysSinceDelivery >= 6 && !careLogs.day7SentAt;
+                                                    const day30Due = isDelivered && daysSinceDelivery >= 28 && !careLogs.day30SentAt;
+
+                                                    const day7Msg = getCareTextMessage(viewingOrder, 'DAY_7');
+                                                    const day30Msg = getCareTextMessage(viewingOrder, 'DAY_30');
+                                                    const day7WaUrl = getWhatsAppCareUrl(viewingOrder, 'DAY_7');
+                                                    const day30WaUrl = getWhatsAppCareUrl(viewingOrder, 'DAY_30');
+
+                                                    return (
+                                                        <div className="space-y-5">
+                                                            {/* Customer Plant Summary Card */}
+                                                            <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-4 sm:p-5 shadow-md">
+                                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-xl">🌱</span>
+                                                                            <h3 className="text-base sm:text-lg font-black tracking-tight">
+                                                                                {customerName} - চারাগাছের যত্ন গাইড
+                                                                            </h3>
+                                                                        </div>
+                                                                        <p className="text-xs text-emerald-200">
+                                                                            অর্ডার: #{viewingOrder.id.slice(0, 8).toUpperCase()} • স্ট্যাটাস: <span className="font-bold text-white uppercase">{viewingOrder.status}</span>
+                                                                            {isDelivered && ` • ডেলিভারির পর: ${daysSinceDelivery} দিন`}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        {phone && phone !== 'N/A' && (
+                                                                            <a
+                                                                                href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm"
+                                                                            >
+                                                                                <span>WhatsApp Direct ({phone})</span>
+                                                                            </a>
+                                                                        )}
+                                                                        <a
+                                                                            href="tel:01768686120"
+                                                                            className="bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors"
+                                                                        >
+                                                                            <Phone className="w-3.5 h-3.5" />
+                                                                            <span>মুন্নার খানম (01768686120)</span>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Ordered Plants Tags */}
+                                                                <div className="mt-3 pt-3 border-t border-emerald-700/60 flex items-center gap-2 flex-wrap text-xs">
+                                                                    <span className="text-emerald-300 font-semibold">অর্ডারের চারাগাছসমূহ:</span>
+                                                                    {viewingOrder.items?.map((item, idx) => (
+                                                                        <span key={idx} className="bg-emerald-700/60 text-emerald-100 px-2.5 py-0.5 rounded-lg font-medium">
+                                                                            🌿 {item.product?.name || 'Plant'} (x{item.quantity})
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Day 7 & Day 30 Two Cards Grid */}
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                {/* ============= 7-DAY STABILIZATION CARD ============= */}
+                                                                <div className="bg-white rounded-2xl border-2 border-emerald-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between space-y-4">
+                                                                    <div>
+                                                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                                                            <div>
+                                                                                <span className="inline-block text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full mb-1">
+                                                                                    Stage 1: ৭ দিনের যত্ন বার্তা
+                                                                                </span>
+                                                                                <h4 className="font-bold text-base text-gray-900">
+                                                                                    রুট সেটেলমেন্ট ও আর্দ্রতা গাইড
+                                                                                </h4>
+                                                                            </div>
+                                                                            {careLogs.day7SentAt ? (
+                                                                                <span className="text-[11px] font-bold bg-green-100 text-green-800 px-2 py-1 rounded-lg flex items-center gap-1">
+                                                                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                                                                    <span>পাঠানো হয়েছে</span>
+                                                                                </span>
+                                                                            ) : day7Due ? (
+                                                                                <span className="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded-lg animate-pulse">
+                                                                                    ⚠️ পাঠানো আবশ্যক ({daysSinceDelivery} দিন)
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">
+                                                                                    সুপারিশ: ৬-১৪ দিন
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <p className="text-xs text-gray-600 mb-3">
+                                                                            ট্রানজিট শক কাটিয়ে শিকড় সুদৃঢ় করার জন্য আলোর ব্যালেন্স ও আর্দ্রতা নিশ্চিতকরণ।
+                                                                        </p>
+
+                                                                        {/* Care Points */}
+                                                                        <div className="space-y-1.5 bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 text-xs text-emerald-950 mb-3">
+                                                                            <p>🌤️ <strong>আলো:</strong> কড়া রোদে না দিয়ে উজ্জ্বল পরোক্ষ আলো-বাতাসে রাখুন।</p>
+                                                                            <p>💧 <strong>পানি:</strong> টবের ওপরের ১ ইঞ্চি মাটি শুকনা হলে পরিমিত পানি দিন।</p>
+                                                                            <p>💨 <strong>স্প্রে:</strong> স্প্রেয়ার দিয়ে পাতায় হালকা কুয়াশা কুয়াশা পানি ছিটিয়ে দিন।</p>
+                                                                            <p>🛡️ <strong>গ্যারান্টি:</strong> ১০০% ভায়াবল রুট প্রটেকশন ও ফ্রি রিপ্লেসমেন্ট সাপোর্ট।</p>
+                                                                        </div>
+
+                                                                        {careLogs.day7SentAt && (
+                                                                            <p className="text-[11px] text-gray-500 italic mb-2">
+                                                                                সর্বশেষ ইমেইল পাঠানো: {new Date(careLogs.day7SentAt).toLocaleString('en-BD')}
+                                                                            </p>
+                                                                        )}
+
+                                                                        {/* Message Preview Quote */}
+                                                                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-[11px] text-gray-700 max-h-36 overflow-y-auto whitespace-pre-line font-mono">
+                                                                            {day7Msg}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Action Buttons */}
+                                                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                                                        {day7WaUrl ? (
+                                                                            <a
+                                                                                href={day7WaUrl}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                                                                            >
+                                                                                <span>১-ক্লিকে হোয়াটসঅ্যাপে বার্তা পাঠান</span>
+                                                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                                            </a>
+                                                                        ) : (
+                                                                            <div className="text-[11px] text-gray-400 text-center py-1">ফোন নম্বর পাওয়া যায়নি</div>
+                                                                        )}
+
+                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleSendCareReminder(viewingOrder.id, 'DAY_7', 'EMAIL')}
+                                                                                className="btn-primary text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5"
+                                                                            >
+                                                                                <Sprout className="w-3.5 h-3.5" />
+                                                                                <span>{careLogs.day7SentAt ? 'পুনরায় ইমেইল' : 'কেয়ার ইমেইল পাঠান'}</span>
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    navigator.clipboard.writeText(day7Msg);
+                                                                                    showToast({ icon: 'success', title: '৭ দিনের কেয়ার মেসেজ কপি হয়েছে!' });
+                                                                                }}
+                                                                                className="btn-glass text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5"
+                                                                            >
+                                                                                <Copy className="w-3.5 h-3.5" />
+                                                                                <span>বার্তা কপি করুন</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* ============= 30-DAY ACTIVE GROWTH & COMPOST CARD ============= */}
+                                                                <div className="bg-white rounded-2xl border-2 border-teal-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between space-y-4">
+                                                                    <div>
+                                                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                                                            <div>
+                                                                                <span className="inline-block text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full mb-1">
+                                                                                    Stage 2: ৩০ দিনের পুষ্টি বার্তা
+                                                                                </span>
+                                                                                <h4 className="font-bold text-base text-gray-900">
+                                                                                    জৈব সার প্রয়োগ ও পাতা ছাঁটাই গাইড
+                                                                                </h4>
+                                                                            </div>
+                                                                            {careLogs.day30SentAt ? (
+                                                                                <span className="text-[11px] font-bold bg-green-100 text-green-800 px-2 py-1 rounded-lg flex items-center gap-1">
+                                                                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                                                                    <span>পাঠানো হয়েছে</span>
+                                                                                </span>
+                                                                            ) : day30Due ? (
+                                                                                <span className="text-[11px] font-bold bg-purple-100 text-purple-800 px-2 py-1 rounded-lg animate-pulse">
+                                                                                    🌟 পুষ্টি বার্তা আবশ্যক ({daysSinceDelivery} দিন)
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">
+                                                                                    সুপারিশ: ২৮-৪৫ দিন
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <p className="text-xs text-gray-600 mb-3">
+                                                                            এক মাস পর নতুন কুঁড়ি ও সতেজ পাতার জন্য জৈব পুষ্টি প্রয়োগ এবং গ্রাহক রিটেনশন তৈরি।
+                                                                        </p>
+
+                                                                        {/* Care Points */}
+                                                                        <div className="space-y-1.5 bg-teal-50/70 p-3 rounded-xl border border-teal-100 text-xs text-teal-950 mb-3">
+                                                                            <p>🍂 <strong>জৈব সার:</strong> টবের কিনার ঘেঁষে ১-২ চামচ ভার্মিকম্পোস্ট প্রয়োগ করুন।</p>
+                                                                            <p>🪴 <strong>নিড়ানি:</strong> ওপরের মাটি আলতো আলগা করে শিকড়ে বাতাস চলাচল বাড়ান।</p>
+                                                                            <p>✂️ <strong>প্রুনিং:</strong> শুকনো বা হলুদ পাতা ছেঁটে দিন যাতে নতুন কুঁড়ি আসে।</p>
+                                                                            <p>🌸 <strong>রিপিট অর্ডার:</strong> মৌসুমের নতুন চারা কালেকশন দেখার আমন্ত্রণ।</p>
+                                                                        </div>
+
+                                                                        {careLogs.day30SentAt && (
+                                                                            <p className="text-[11px] text-gray-500 italic mb-2">
+                                                                                সর্বশেষ ইমেইল পাঠানো: {new Date(careLogs.day30SentAt).toLocaleString('en-BD')}
+                                                                            </p>
+                                                                        )}
+
+                                                                        {/* Message Preview Quote */}
+                                                                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-[11px] text-gray-700 max-h-36 overflow-y-auto whitespace-pre-line font-mono">
+                                                                            {day30Msg}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Action Buttons */}
+                                                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                                                        {day30WaUrl ? (
+                                                                            <a
+                                                                                href={day30WaUrl}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                                                                            >
+                                                                                <span>১-ক্লিকে হোয়াটসঅ্যাপে বার্তা পাঠান</span>
+                                                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                                            </a>
+                                                                        ) : (
+                                                                            <div className="text-[11px] text-gray-400 text-center py-1">ফোন নম্বর পাওয়া যায়নি</div>
+                                                                        )}
+
+                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleSendCareReminder(viewingOrder.id, 'DAY_30', 'EMAIL')}
+                                                                                className="btn-primary text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5"
+                                                                            >
+                                                                                <Sprout className="w-3.5 h-3.5" />
+                                                                                <span>{careLogs.day30SentAt ? 'পুনরায় ইমেইল' : 'কেয়ার ইমেইল পাঠান'}</span>
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    navigator.clipboard.writeText(day30Msg);
+                                                                                    showToast({ icon: 'success', title: '৩০ দিনের কেয়ার মেসেজ কপি হয়েছে!' });
+                                                                                }}
+                                                                                className="btn-glass text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5"
+                                                                            >
+                                                                                <Copy className="w-3.5 h-3.5" />
+                                                                                <span>বার্তা কপি করুন</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Automation Information Banner */}
+                                                            <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-start gap-3 text-xs text-emerald-950">
+                                                                <Sprout className="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5" />
+                                                                <div className="space-y-1">
+                                                                    <p className="font-bold text-emerald-900">
+                                                                        🤖 গ্রিন পেটালস অটোমেটেড কেয়ার সিস্টেম (Automated Plant Care Cron)
+                                                                    </p>
+                                                                    <p className="text-emerald-800">
+                                                                        আমাদের ব্যাকএন্ড শিডিউলার প্রতি ১২ ঘণ্টায় সব ডেলিভার্ড অর্ডার স্বয়ংক্রিয়ভাবে পর্যবেক্ষণ করে এবং যথাসময়ে ৭ ও ৩০ দিনের কেয়ার ইমেইল গ্রাহকের ইনবক্সে পাঠিয়ে দেয়। এছাড়া মুন্নার খানম ব্যক্তিগত সম্পর্ক ও রিপিট সেল বৃদ্ধির জন্য ওপরের সবুজ বাটন চেপে সরাসরি WhatsApp মেসেজ পাঠাতে পারেন।
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );
