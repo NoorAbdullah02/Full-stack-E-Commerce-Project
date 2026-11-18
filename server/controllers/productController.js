@@ -122,11 +122,49 @@ const getProducts = async (req, res) => {
 const getCategories = async (req, res) => {
     console.log('GET /api/products/categories called');
     try {
-        const categories = await prisma.category.findMany();
+        const categories = await prisma.category.findMany({
+            orderBy: { name: 'asc' }
+        });
         console.log('Categories found:', categories.length);
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// @desc    Create new category
+// @route   POST /api/products/categories
+// @access  Private/Admin
+const createCategory = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name || !name.trim()) {
+            return res.status(400).json({ message: 'Category name is required' });
+        }
+
+        const trimmedName = name.trim();
+        const existing = await prisma.category.findFirst({
+            where: {
+                name: {
+                    equals: trimmedName,
+                    mode: 'insensitive'
+                }
+            }
+        });
+
+        if (existing) {
+            return res.status(400).json({ message: 'Category already exists' });
+        }
+
+        const category = await prisma.category.create({
+            data: { name: trimmedName }
+        });
+
+        console.log(`✅ Created new category: ${category.name}`);
+        res.status(201).json(category);
+    } catch (error) {
+        console.error('Create Category Error:', error);
+        res.status(500).json({ message: 'Error creating category' });
     }
 };
 
@@ -277,4 +315,5 @@ module.exports = {
     updateProduct,
     deleteProduct,
     getCategories,
+    createCategory,
 };

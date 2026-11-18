@@ -6,7 +6,8 @@ const {
     createProduct,
     updateProduct,
     deleteProduct,
-    getCategories
+    getCategories,
+    createCategory
 } = require('../controllers/productController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 const upload = require('../utils/multer');
@@ -16,7 +17,9 @@ router.route('/')
     .post(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), upload.array('images'), createProduct);
 // .post(upload.array('images'), createProduct); // TEMPORARY DEBUG: Auth disabled
 
-router.get('/categories', getCategories);
+router.route('/categories')
+    .get(getCategories)
+    .post(protect, restrictTo('ADMIN', 'SUPER_ADMIN'), createCategory);
 
 router.route('/:id')
     .get(getProductById)

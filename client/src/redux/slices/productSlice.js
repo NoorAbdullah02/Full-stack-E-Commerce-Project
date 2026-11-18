@@ -47,6 +47,25 @@ export const getCategories = createAsyncThunk(
     }
 );
 
+export const createCategory = createAsyncThunk(
+    'products/createCategory',
+    async (name, { getState, rejectWithValue }) => {
+        try {
+            const { auth: { userInfo } } = getState();
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo?.token}`,
+                },
+                withCredentials: true,
+            };
+            const { data } = await axios.post(`${backendURL}/api/products/categories`, { name }, config);
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.response && error.response.data.message ? error.response.data.message : error.message);
+        }
+    }
+);
+
 export const listProductDetails = createAsyncThunk(
     'products/details',
     async (id, { rejectWithValue }) => {
@@ -207,6 +226,9 @@ const productSlice = createSlice({
             })
             .addCase(getCategories.fulfilled, (state, action) => {
                 state.categories = action.payload;
+            })
+            .addCase(createCategory.fulfilled, (state, action) => {
+                state.categories.push(action.payload);
             });
     },
 });

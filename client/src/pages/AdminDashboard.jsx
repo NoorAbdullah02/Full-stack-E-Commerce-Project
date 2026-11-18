@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { listProducts, createProduct, deleteProduct, generateDescription, getCategories, updateProduct } from '../redux/slices/productSlice';
+import { listProducts, createProduct, deleteProduct, generateDescription, getCategories, updateProduct, createCategory } from '../redux/slices/productSlice';
 import { listAllOrders, updateOrderStatus, cancelOrder } from '../redux/slices/orderSlice';
 import { listUsers } from '../redux/slices/authSlice';
 import { formatCurrency } from '../utils/currency';
@@ -12,7 +12,16 @@ const AdminDashboard = () => {
     const dispatch = useDispatch();
     const galleryInputRef = useRef(null);
     const cameraInputRef = useRef(null);
-    const [activeTab, setActiveTab] = useState('analytics');
+    const [activeTab, setActiveTabState] = useState(() => {
+        return new URLSearchParams(window.location.search).get('tab') || 'analytics';
+    });
+
+    const setActiveTab = (tab) => {
+        setActiveTabState(tab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState({}, '', url.toString());
+    };
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editProductId, setEditProductId] = useState(null);
@@ -31,6 +40,8 @@ const AdminDashboard = () => {
     const [description, setDescription] = useState('');
     const [stock, setStock] = useState('');
     const [categoryId, setCategoryId] = useState('');
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [imageUrl, setImageUrl] = useState('');
@@ -111,8 +122,23 @@ const AdminDashboard = () => {
 
     const resetForm = () => {
         setName(''); setPrice(''); setOriginalPrice(''); setDiscount(''); setDescription(''); setStock(''); setImage(null); setImagePreview(null); setCategoryId('');
+        setShowNewCategoryInput(false);
+        setNewCategoryName('');
         setIsEditing(false);
         setEditProductId(null);
+    };
+
+    const handleAddCategorySubmit = async () => {
+        if (!newCategoryName.trim()) return;
+        try {
+            const created = await dispatch(createCategory(newCategoryName.trim())).unwrap();
+            setCategoryId(created.id);
+            setNewCategoryName('');
+            setShowNewCategoryInput(false);
+            showToast({ icon: 'success', title: `🌿 "${created.name}" নতুন ক্যাটাগরি তৈরি ও নির্বাচন সম্পন্ন!` });
+        } catch (err) {
+            showError('ক্যাটাগরি তৈরি ব্যর্থ', err || 'ক্যাটাগরি তৈরি করা সম্ভব হয়নি');
+        }
     };
 
     const handleEditProduct = (product) => {
@@ -642,11 +668,62 @@ const AdminDashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Field 4: Category Selection as Touch-Friendly Interactive Chips */}
+                                    {/* Field 4: Category Selection as Touch-Friendly Interactive Chips + Create Category */}
                                     <div>
-                                        <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
-                                            Category (ক্যাটাগরি নির্বাচন করুন) <span className="text-red-500">*</span>
-                                        </label>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-xs sm:text-sm font-bold text-gray-800">
+                                                Category (ক্যাটাগরি নির্বাচন করুন) <span className="text-red-500">*</span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNewCategoryInput(!showNewCategoryInput)}
+                                                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-xl transition-all active:scale-95 shadow-sm"
+                                            >
+                                                <Plus className="w-3.5 h-3.5 text-emerald-600" />
+                                                <span>{showNewCategoryInput ? 'বাতিল করুন' : '+ New Category (নতুন ক্যাটাগরি)'}</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Quick Inline New Category Form */}
+                                        {showNewCategoryInput && (
+                                            <div className="p-3 mb-3 bg-emerald-50/80 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2 animate-fade-in shadow-sm">
+                                                <input
+                                                    type="text"
+                                                    placeholder="নতুন ক্যাটাগরির নাম (যেমন: Bonsai & Mini Trees, Aquatic Plants)..."
+                                                    value={newCategoryName}
+                                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleAddCategorySubmit();
+                                                        }
+                                                    }}
+                                                    className="input-glass flex-1 text-xs sm:text-sm py-2 bg-white font-medium"
+                                                    autoFocus
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleAddCategorySubmit}
+                                                        disabled={!newCategoryName.trim()}
+                                                        className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all disabled:opacity-50 active:scale-95"
+                                                    >
+                                                        যুক্ত করুন
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setShowNewCategoryInput(false);
+                                                            setNewCategoryName('');
+                                                        }}
+                                                        className="px-3 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 text-xs font-semibold rounded-xl"
+                                                    >
+                                                        বন্ধ
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                             {categories.map((cat) => {
                                                 const isSelected = categoryId === cat.id;
@@ -666,7 +743,8 @@ const AdminDashboard = () => {
                                                              cat.name.includes('Flowering') ? '🌸' :
                                                              cat.name.includes('Succulent') ? '🌵' :
                                                              cat.name.includes('Air') ? '🍃' :
-                                                             cat.name.includes('Pot') ? '🏺' : '🧪'}
+                                                             cat.name.includes('Pot') ? '🏺' :
+                                                             cat.name.includes('Care') || cat.name.includes('Soil') ? '🧪' : '🌿'}
                                                         </span>
                                                         <span className="truncate">{cat.name}</span>
                                                     </button>
