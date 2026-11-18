@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useCallback, useEffect } from 'react';
 import { addToCart, removeFromCart, updateCartItem } from '../redux/slices/cartSlice';
 import { formatCurrency } from '../utils/currency';
-import { Trash2, ShoppingBag, Plus, Minus, ArrowRight } from 'lucide-react';
+import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
+import { Trash2, ShoppingBag, Plus, Minus, ArrowRight, Truck } from 'lucide-react';
 
 // Simple debounce utility
 function debounce(func, wait) {
@@ -188,7 +189,18 @@ const Cart = () => {
     return (
         <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-4xl font-bold mb-12 fade-in-up">
+                {/* Back to Products Navigation */}
+                <div className="mb-4">
+                    <button
+                        onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/products')}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl glass border border-emerald-100/90 text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/80 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95 group"
+                    >
+                        <ArrowRight className="w-4 h-4 text-emerald-600 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Continue Shopping (আরও গাছ দেখুন)</span>
+                    </button>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl font-bold mb-8 fade-in-up">
                     Shopping <span className="text-gradient">Cart</span>
                 </h1>
 
@@ -215,21 +227,19 @@ const Cart = () => {
                                     <span className="font-semibold">{formatCurrency(tax)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-700">
-                                    <span>Shipping</span>
-                                    <span className={`font-semibold ${shipping === 0 ? 'text-green-600' : ''}`}>
-                                        {shipping === 0 ? 'Free' : formatCurrency(shipping)}
+                                    <div>
+                                        <span className="block">Courier (Express Plant)</span>
+                                        <span className="text-[11px] text-gray-500">Tiered by weight & district (Barishal ৳100 / All BD ৳150)</span>
+                                    </div>
+                                    <span className="font-semibold text-emerald-800">
+                                        Calculated at checkout
                                     </span>
                                 </div>
-                                {subtotal < 5000 && (
-                                    <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200/60 p-3 rounded-xl font-medium">
-                                        Add {formatCurrency(5000 - subtotal)} more for free delivery nationwide!
-                                    </p>
-                                )}
                             </div>
 
                             <div className="flex justify-between items-baseline">
-                                <span className="text-lg font-semibold">Total</span>
-                                <span className="text-3xl font-bold text-gradient">{formatCurrency(total)}</span>
+                                <span className="text-lg font-semibold">Estimated Items Total</span>
+                                <span className="text-3xl font-bold text-gradient">{formatCurrency(subtotal + tax)}</span>
                             </div>
 
                             <button
@@ -245,6 +255,9 @@ const Cart = () => {
                                     Continue Shopping
                                 </button>
                             </Link>
+
+                            {/* Plant Guarantee & Care */}
+                            <PlantGuaranteeCard className="mt-4" />
                         </div>
                     </div>
                 </div>

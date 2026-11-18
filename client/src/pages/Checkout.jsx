@@ -6,7 +6,8 @@ import { clearCart } from '../redux/slices/cartSlice';
 import { addToast } from '../redux/slices/toastSlice';
 import { formatCurrency } from '../utils/currency';
 import { showOrderSuccess, showToast, showError } from '../utils/alerts';
-import { CreditCard, MapPin, ArrowRight, X, Copy, Check, ShieldCheck, Smartphone, Sparkles, Sprout, AlertCircle, Phone } from 'lucide-react';
+import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
+import { CreditCard, MapPin, ArrowRight, X, Copy, Check, ShieldCheck, Smartphone, Sparkles, Sprout, AlertCircle, Phone, Scale } from 'lucide-react';
 
 const BKASH_NUMBER = '01715020391';
 
@@ -38,8 +39,17 @@ const Checkout = () => {
     const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (item.qty || 1), 0);
     const tax = subtotal * 0.1;
 
-    // Shipping Logic: 100 Inside Barishal Metro, 150 Outside Barishal (All BD)
-    const shipping = isInsideBarishal ? 100 : 150;
+    // Weight-tiered courier calculation:
+    // Base covers up to 1kg (Barishal: ৳100, All other districts: ৳150)
+    // Live plant with grower pot/packaging estimated at ~0.7kg
+    // Extra weight charge: ৳20 per extra kg
+    const totalItemsCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
+    const totalWeightKg = Number((totalItemsCount * 0.7).toFixed(1));
+    const extraKg = Math.max(0, Math.ceil(totalWeightKg - 1));
+    const extraWeightCharge = extraKg * 20;
+
+    const baseShipping = isInsideBarishal ? 100 : 150;
+    const shipping = baseShipping + extraWeightCharge;
     const total = subtotal + tax + shipping;
 
     const copyBkashNumber = () => {
@@ -159,6 +169,18 @@ const Checkout = () => {
     return (
         <div className="min-h-screen pt-24 pb-20 px-3 sm:px-6 lg:px-8 relative">
             <div className="max-w-7xl mx-auto">
+                {/* Back to Cart Navigation */}
+                <div className="mb-4">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/cart')}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl glass border border-emerald-100/90 text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/80 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95 group"
+                    >
+                        <ArrowRight className="w-4 h-4 text-emerald-600 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Back to Cart (কার্টে ফিরে যান)</span>
+                    </button>
+                </div>
+
                 <div className="mb-8 fade-in-up">
                     <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium mb-3">
                         <Sprout className="w-4 h-4 text-emerald-600" />
@@ -283,8 +305,16 @@ const Checkout = () => {
 
                             {/* Shipping Zone */}
                             <div className="glass rounded-3xl p-5 sm:p-8 border border-emerald-100">
-                                <h2 className="text-lg sm:text-2xl font-bold mb-3 text-gray-900">2. Delivery Location Zone</h2>
-                                <p className="text-xs text-gray-500 mb-4">Choose your region to apply express plant courier rates</p>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                    <h2 className="text-lg sm:text-2xl font-bold text-gray-900">2. Delivery Location Zone</h2>
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                        <Scale className="w-3.5 h-3.5" />
+                                        <span>Est. Parcel: {totalWeightKg} kg ({totalItemsCount} plants)</span>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-500 mb-4">
+                                    Courier rate is based on delivery district and parcel weight (+৳20 per extra kg above 1kg base).
+                                </p>
                                 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <label className={`cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}>
@@ -297,9 +327,9 @@ const Checkout = () => {
                                         />
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="font-bold text-gray-900 text-sm sm:text-base">Inside Barishal Metro</span>
-                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(100)}</span>
+                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(100 + extraWeightCharge)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-600">Fast 24-48 Hours Express Plant Delivery</p>
+                                        <p className="text-xs text-gray-600">Fast 24-48h Delivery (Base ৳100 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
                                     </label>
                                     <label className={`cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${!isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}>
                                         <input
@@ -311,9 +341,9 @@ const Checkout = () => {
                                         />
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="font-bold text-gray-900 text-sm sm:text-base">Outside Barishal (All 64 Districts)</span>
-                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(150)}</span>
+                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(150 + extraWeightCharge)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-600">2-4 Days Moist-Locked Protective Packaging</p>
+                                        <p className="text-xs text-gray-600">2-4 Days Moist-Locked Packaging (Base ৳150 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
                                     </label>
                                 </div>
                             </div>
@@ -436,11 +466,15 @@ const Checkout = () => {
                                         <span className="font-semibold text-gray-900">{formatCurrency(tax)}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
-                                        <span>Courier Delivery</span>
+                                        <div>
+                                            <span className="block">Courier Delivery</span>
+                                            <span className="text-[11px] text-gray-500">Weight: {totalWeightKg} kg ({totalItemsCount} plants)</span>
+                                        </div>
                                         <div className="text-right">
                                             <span className="font-semibold text-gray-900 block">{formatCurrency(shipping)}</span>
                                             <span className="text-[11px] text-emerald-700 font-medium">
-                                                {isInsideBarishal ? 'Barishal Metro (৳100)' : 'Outside Barishal (৳150)'}
+                                                {isInsideBarishal ? 'Barishal (৳100 base)' : 'Outside Barishal (৳150 base)'}
+                                                {extraKg > 0 ? ` + ৳${extraWeightCharge} (${extraKg}kg extra)` : ''}
                                             </span>
                                         </div>
                                     </div>
@@ -449,7 +483,7 @@ const Checkout = () => {
                                 <div className="flex justify-between items-baseline pt-1">
                                     <div>
                                         <span className="text-sm sm:text-base font-semibold text-gray-700 block">Total Payable</span>
-                                        <span className="text-[11px] text-gray-400">All taxes & packaging included</span>
+                                        <span className="text-[11px] text-gray-400">All taxes, packaging & courier included</span>
                                     </div>
                                     <span className="text-2xl sm:text-3xl font-extrabold text-gradient">{formatCurrency(total)}</span>
                                 </div>
@@ -466,16 +500,14 @@ const Checkout = () => {
                                         </div>
                                     ) : (
                                         <>
-                                            <span>Place Order</span>
+                                            <span>Place Order • {formatCurrency(total)}</span>
                                             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                         </>
                                     )}
                                 </button>
 
-                                <div className="flex items-center justify-center gap-2 text-[11px] sm:text-xs text-gray-500 pt-1">
-                                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                                    <span>Green Petals 100% Thriving Plant Guarantee</span>
-                                </div>
+                                {/* Plant Guarantee & Policy Card */}
+                                <PlantGuaranteeCard className="mt-4" />
                             </div>
                         </div>
                     </div>

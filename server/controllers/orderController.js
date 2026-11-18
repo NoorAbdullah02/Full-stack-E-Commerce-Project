@@ -310,9 +310,18 @@ const addOrderItems = async (req, res) => {
         // BUT we MUST ensure the product prices are correct.
         // processedTotal vs req.body.totalPrice
 
-        // Better approach: Recalculate everything.
-        const isBarishal = shippingAddress.city && shippingAddress.city.toLowerCase().includes('barishal');
-        shippingCost = isBarishal ? 100 : 150;
+        // Better approach: Recalculate everything including weight-tiered express courier
+        const totalItemsCount = orderItems.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+        const totalWeightKg = Number((totalItemsCount * 0.7).toFixed(1));
+        const extraKg = Math.max(0, Math.ceil(totalWeightKg - 1));
+        const extraWeightCharge = extraKg * 20;
+
+        const isBarishal = shippingAddress.city && (
+            shippingAddress.city.toLowerCase().includes('barishal') ||
+            shippingAddress.city.toLowerCase().includes('বরিশাল')
+        );
+        const baseShipping = isBarishal ? 100 : 150;
+        shippingCost = baseShipping + extraWeightCharge;
 
         // Tax 10%
         const tax = calculatedTotal * 0.1;

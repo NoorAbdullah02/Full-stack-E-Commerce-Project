@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "node -e \"require('dotenv').config({path:'../.env'}); if(process.env.DATABASE_URL){require('child_process').execSync('npx prisma db push', {stdio:'inherit'})}else{console.log('Skipping prisma db push: DATABASE_URL not set')}\""
   },
   "keywords": [],
   "author": "",

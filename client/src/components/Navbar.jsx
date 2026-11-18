@@ -89,6 +89,18 @@ const Navbar = () => {
 
                         {/* Actions (Desktop) */}
                         <div className="hidden md:flex items-center space-x-3 flex-shrink-0">
+                            <a
+                                href="https://www.facebook.com/share/1E2Y48eA5s/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-gray-600 hover:text-[#1877F2] transition-colors"
+                                title="Green Petals Facebook"
+                            >
+                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                            </a>
+
                             <Link to="/wishlist" className="relative p-2 text-gray-700 hover:text-rose-600 transition-colors" title="Wishlist">
                                 <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'text-rose-500 fill-rose-100' : ''}`} />
                                 {wishlistCount > 0 && (
@@ -324,11 +336,23 @@ const Navbar = () => {
                                 </div>
                             )}
 
-                            {/* Store Quick Info */}
-                            <div className="bg-gray-50 rounded-2xl p-3 text-xs text-gray-600 space-y-1">
-                                <p><strong>Proprietor:</strong> Munnar Khanam</p>
-                                <p><strong>Hotline:</strong> <a href="tel:01768686120" className="text-emerald-700 font-bold">01768686120</a></p>
-                                <p><strong>Facebook:</strong> <a href="https://www.facebook.com/munnar.khanam" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">fb.com/munnar.khanam</a></p>
+                            {/* Store Quick Info & FB */}
+                            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-3 text-xs text-gray-700 space-y-2">
+                                <div className="space-y-1">
+                                    <p><strong>Proprietor:</strong> Munnar Khanam</p>
+                                    <p><strong>Hotline:</strong> <a href="tel:01768686120" className="text-emerald-700 font-bold">01768686120</a></p>
+                                </div>
+                                <a
+                                    href="https://www.facebook.com/share/1E2Y48eA5s/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#1877F2] text-white font-bold text-xs hover:bg-[#166fe5] transition-all shadow-sm"
+                                >
+                                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                    </svg>
+                                    <span>Follow on Facebook (পেজে মেসেজ করুন)</span>
+                                </a>
                             </div>
                         </div>
 

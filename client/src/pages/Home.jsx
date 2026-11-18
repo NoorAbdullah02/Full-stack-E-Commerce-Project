@@ -6,6 +6,7 @@ import { addToWishlist, removeFromWishlist } from '../redux/slices/wishlistSlice
 import { addToast } from '../redux/slices/toastSlice';
 import { useNavigate } from 'react-router-dom';
 import Newsletter from '../components/Newsletter';
+import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
 import { ArrowRight, Star, TrendingUp, ShieldCheck, Truck, Clock, Sparkles, Shield, Heart, ShoppingCart, Eye, X, ChevronLeft, ChevronRight, Sprout, Shuffle, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../utils/currency';
@@ -603,6 +604,11 @@ const Home = () => {
                     </div>
                 </div>
             )}
+
+            {/* Green Petals Guarantee & Policy Banner */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10 sm:my-14">
+                <PlantGuaranteeCard />
+            </div>
 
             <Newsletter />
         </div>

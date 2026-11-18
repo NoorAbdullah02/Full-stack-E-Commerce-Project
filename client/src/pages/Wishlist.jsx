@@ -68,6 +68,17 @@ const Wishlist = () => {
     return (
         <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
+                {/* Back Navigation */}
+                <div className="mb-4">
+                    <button
+                        onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/products')}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl glass border border-emerald-100/90 text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/80 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95 group"
+                    >
+                        <ArrowRight className="w-4 h-4 text-emerald-600 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Continue Shopping (আরও গাছ দেখুন)</span>
+                    </button>
+                </div>
+
                 <div className="flex items-center justify-between mb-8 sm:mb-12">
                     <div>
                         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900">

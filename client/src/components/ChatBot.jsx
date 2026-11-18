@@ -45,7 +45,7 @@ const ChatBot = () => {
         } catch (error) {
             setMessages((prev) => [...prev, {
                 role: 'model',
-                content: 'Welcome to Green Petals! 🌿 For immediate assistance, feel free to call store proprietor Munnar Khanam at 01768686120 or message on Facebook: fb.com/munnar.khanam.'
+                content: 'Welcome to Green Petals! 🌿 For immediate assistance, feel free to call store proprietor Munnar Khanam at 01768686120 or message our Facebook page: https://www.facebook.com/share/1E2Y48eA5s/.'
             }]);
         } finally {
             setLoading(false);

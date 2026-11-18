@@ -9,7 +9,7 @@ import { createReview, getReviews, markHelpful, resetReviewSuccess } from '../re
 import { formatCurrency } from '../utils/currency';
 import StarRating from '../components/StarRating';
 import RelatedProducts from '../components/RelatedProducts';
-import { Heart, ShoppingCart, Star, Check, Truck, ShieldCheck, User, ThumbsUp, ThumbsDown, Sprout, Droplets, Sun, Sparkles, MessageCircle, Phone, Plus, Minus } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Check, Truck, ShieldCheck, User, ThumbsUp, ThumbsDown, Sprout, Droplets, Sun, Sparkles, MessageCircle, Phone, Plus, Minus, ArrowLeft } from 'lucide-react';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -153,6 +153,18 @@ const ProductDetails = () => {
     return (
         <div className="min-h-screen pt-24 pb-28 sm:pb-20 px-3 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
+                
+                {/* Back Navigation Button */}
+                <div className="mb-4 sm:mb-6">
+                    <button
+                        onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/products')}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl glass border border-emerald-100/90 text-gray-700 hover:text-emerald-700 hover:bg-emerald-50/80 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95 group"
+                    >
+                        <ArrowLeft className="w-4 h-4 text-emerald-600 group-hover:-translate-x-1 transition-transform" />
+                        <span>Back to Plants (পেছনে যান)</span>
+                    </button>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-start mb-16">
                     
                     {/* Product Images Studio */}
@@ -362,7 +374,7 @@ const ProductDetails = () => {
                                     <Truck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <strong className="text-gray-900 block">Express Plant Courier:</strong>
-                                        <span className="text-gray-600 text-[11px] sm:text-xs">Barishal Metro ৳100 (24–48h) | All Other Districts ৳150 (2–4 days).</span>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Barishal Metro ৳100 (24–48h) | All Other Districts ৳150 (2–4 days). Weight-based courier: +৳20 per extra kg.</span>
                                     </div>
                                 </div>
 
@@ -373,6 +385,21 @@ const ProductDetails = () => {
                                         <span className="text-gray-600 text-[11px] sm:text-xs">Call proprietor Munnar Khanam: <a href="tel:01768686120" className="text-emerald-700 font-bold hover:underline">01768686120</a></span>
                                     </div>
                                 </div>
+
+                                <a
+                                    href="https://www.facebook.com/share/1E2Y48eA5s/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between bg-[#1877F2]/10 hover:bg-[#1877F2]/20 p-2.5 rounded-xl border border-[#1877F2]/20 transition-colors text-xs text-[#1877F2] font-semibold"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                        </svg>
+                                        Facebook Page & Consultation:
+                                    </span>
+                                    <span className="font-bold underline">Green Petals FB</span>
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import { Award, Users, Globe, Heart, Sprout, ShieldCheck, Sun, Droplets } from 'lucide-react';
+import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
 
 const About = () => {
     return (
@@ -90,6 +91,11 @@ const About = () => {
                         <h3 className="text-xl font-bold mb-2">Guaranteed Viability</h3>
                         <p className="text-gray-600 text-sm">If any plant arrives damaged or unhealthy, we replace it promptly with no hassles.</p>
                     </div>
+                </div>
+
+                {/* Plant Guarantee & Policy Card */}
+                <div className="mt-8">
+                    <PlantGuaranteeCard />
                 </div>
             </div>
         </div>

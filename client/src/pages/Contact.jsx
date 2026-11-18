@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Sprout, Clock } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../redux/slices/toastSlice';
+import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
 
 const Contact = () => {
     const dispatch = useDispatch();
@@ -74,7 +75,7 @@ const Contact = () => {
                         </div>
 
                         <a
-                            href="https://www.facebook.com/munnar.khanam"
+                            href="https://www.facebook.com/share/1E2Y48eA5s/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="glass p-6 rounded-3xl flex items-center justify-between border border-blue-100 bg-blue-50/40 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 group"
@@ -85,11 +86,11 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-gray-900 text-base">Connect on Facebook</h4>
-                                    <p className="text-xs text-blue-700">facebook.com/munnar.khanam</p>
+                                    <p className="text-xs text-blue-700">Green Petals Official Page</p>
                                 </div>
                             </div>
                             <span className="text-xs font-bold text-blue-700 bg-white px-3 py-1.5 rounded-full border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                View Profile ↗
+                                View Page ↗
                             </span>
                         </a>
                     </div>
@@ -135,6 +136,11 @@ const Contact = () => {
                             </button>
                         </form>
                     </div>
+                </div>
+
+                {/* Plant Guarantee & Care Policy */}
+                <div className="mt-10">
+                    <PlantGuaranteeCard />
                 </div>
             </div>
         </div>
