@@ -433,10 +433,10 @@ const AdminDashboard = () => {
                                                 });
                                                 const colors = {
                                                     'PENDING': '#f59e0b',
-                                                    'PROCESSING': '#3b82f6',
-                                                    'SHIPPED': '#8b5cf6',
+                                                    'PROCESSING': '#0284c7',
+                                                    'SHIPPED': '#0d9488',
                                                     'DELIVERED': '#10b981',
-                                                    'PAID': '#06b6d4',
+                                                    'PAID': '#059669',
                                                     'CANCELLED': '#ef4444'
                                                 };
                                                 return Object.entries(statusCount).map(([status, count]) => ({
@@ -460,10 +460,10 @@ const AdminDashboard = () => {
                                                 });
                                                 const colors = {
                                                     'PENDING': '#f59e0b',
-                                                    'PROCESSING': '#3b82f6',
-                                                    'SHIPPED': '#8b5cf6',
+                                                    'PROCESSING': '#0284c7',
+                                                    'SHIPPED': '#0d9488',
                                                     'DELIVERED': '#10b981',
-                                                    'PAID': '#06b6d4',
+                                                    'PAID': '#059669',
                                                     'CANCELLED': '#ef4444'
                                                 };
                                                 return Object.entries(statusCount).map(([status], index) => (
@@ -486,7 +486,7 @@ const AdminDashboard = () => {
                                     <XAxis dataKey="name" stroke="#6b7280" />
                                     <YAxis stroke="#6b7280" />
                                     <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-                                    <Bar dataKey="stock" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                                    <Bar dataKey="stock" fill="#059669" radius={[8, 8, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

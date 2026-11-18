@@ -70,7 +70,7 @@ const PlantGuaranteeCard = ({ className = '' }) => {
                             Express Plant Courier:
                         </h4>
                         <p className="text-gray-600 text-[11px] sm:text-xs leading-relaxed">
-                            Barishal Metro ৳100 (24–48h) | All Other Districts ৳150 (2–4 days). Weight tiered: +৳20/extra kg.
+                            Barishal Metro ৳100 (24–48h) | All Other Districts ৳180 (2–4 days). Weight tiered: +৳20/extra kg.
                         </p>
                     </div>
                 </div>

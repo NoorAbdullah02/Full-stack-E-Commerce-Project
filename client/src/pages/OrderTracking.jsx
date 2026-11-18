@@ -251,13 +251,9 @@ const OrderTracking = () => {
                                     <span>Shipping</span>
                                     <span>
                                         {order.shippingAddress
-                                            ? formatCurrency(order.shippingAddress.city.toLowerCase().includes('dhaka') ? 100 : 150)
+                                            ? formatCurrency(order.shippingAddress.city && order.shippingAddress.city.toLowerCase().includes('barishal') ? 100 : 180)
                                             : 'Calculated'}
                                     </span>
-                                </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>Tax (10%)</span>
-                                    <span>{formatCurrency(order.items.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.1)}</span>
                                 </div>
                                 <div className="flex justify-between font-bold text-lg text-gray-900 pt-2 border-t border-gray-100">
                                     <span>Total</span>

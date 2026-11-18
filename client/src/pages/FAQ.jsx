@@ -5,15 +5,15 @@ const FAQ = () => {
     const faqs = [
         {
             question: "What payment methods do you accept?",
-            answer: "We accept all major credit cards, mobile banking (Bkash, Nagad), and Cash on Delivery."
+            answer: "We exclusively accept prepaid bKash Send Money to our official number 01715020391 (Proprietor: Munnar Khanam). Cash on Delivery is disabled so our botanical team can immediately prepare, moisture-lock, and express-dispatch your living plants."
         },
         {
-            question: "How long does shipping take?",
-            answer: "Standard shipping takes 3-5 business days within Dhaka and 5-7 days for other districts."
+            question: "How much is courier delivery across Bangladesh?",
+            answer: "Inside Barishal Metro is ৳100 (24–48 hours). All other 63 districts nationwide is ৳180 (2–4 days) with specialized moisture-lock root protection packaging. A nominal weight charge of +৳20 applies per extra kg for large orders."
         },
         {
-            question: "What is your return policy?",
-            answer: "We offer a 30-day return policy for unused items in original packaging. Return shipping is free."
+            question: "What is your plant guarantee policy?",
+            answer: "100% Viable Root Guarantee. Every plant is nurtured with organic compost. If damaged in transit, we provide a free replacement or personal care guidance. Call Munnar Khanam directly at 01768686120."
         },
         {
             question: "Do you offer international shipping?",

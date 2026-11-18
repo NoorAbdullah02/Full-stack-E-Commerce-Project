@@ -374,7 +374,7 @@ const ProductDetails = () => {
                                     <Truck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <strong className="text-gray-900 block">Express Plant Courier:</strong>
-                                        <span className="text-gray-600 text-[11px] sm:text-xs">Barishal Metro ৳100 (24–48h) | All Other Districts ৳150 (2–4 days). Weight-based courier: +৳20 per extra kg.</span>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Barishal Metro ৳100 (24–48h) | All Other Districts ৳180 (2–4 days). Weight-based courier: +৳20 per extra kg.</span>
                                     </div>
                                 </div>
 

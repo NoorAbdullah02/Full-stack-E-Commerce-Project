@@ -7,7 +7,7 @@ import { addToast } from '../redux/slices/toastSlice';
 import { formatCurrency } from '../utils/currency';
 import { showOrderSuccess, showToast, showError } from '../utils/alerts';
 import PlantGuaranteeCard from '../components/PlantGuaranteeCard';
-import { CreditCard, MapPin, ArrowRight, X, Copy, Check, ShieldCheck, Smartphone, Sparkles, Sprout, AlertCircle, Phone, Scale } from 'lucide-react';
+import { CreditCard, MapPin, ArrowRight, X, Copy, Check, CheckCircle2, ShieldCheck, Smartphone, Sparkles, Sprout, AlertCircle, Phone, Scale } from 'lucide-react';
 
 const BKASH_NUMBER = '01715020391';
 
@@ -29,7 +29,7 @@ const Checkout = () => {
     });
 
     const [addressError, setAddressError] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
+    const [paymentMethod] = useState('bKash Payment');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [transactionId, setTransactionId] = useState('');
     const [isInsideBarishal, setIsInsideBarishal] = useState(true);
@@ -37,10 +37,9 @@ const Checkout = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (item.qty || 1), 0);
-    const tax = subtotal * 0.1;
 
     // Weight-tiered courier calculation:
-    // Base covers up to 1kg (Barishal: ৳100, All other districts: ৳150)
+    // Base covers up to 1kg (Barishal: ৳100, Outside Barishal all 64 districts: ৳180)
     // Live plant with grower pot/packaging estimated at ~0.7kg
     // Extra weight charge: ৳20 per extra kg
     const totalItemsCount = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
@@ -48,9 +47,10 @@ const Checkout = () => {
     const extraKg = Math.max(0, Math.ceil(totalWeightKg - 1));
     const extraWeightCharge = extraKg * 20;
 
-    const baseShipping = isInsideBarishal ? 100 : 150;
+    const baseShipping = isInsideBarishal ? 100 : 180;
     const shipping = baseShipping + extraWeightCharge;
-    const total = subtotal + tax + shipping;
+    // 0% Tax (Removed 10% tax per user mandate)
+    const total = subtotal + shipping;
 
     const copyBkashNumber = () => {
         try {
@@ -89,19 +89,6 @@ const Checkout = () => {
         return true;
     };
 
-    const handleSelectPaymentMethod = (method) => {
-        setPaymentMethod(method);
-        if (method === 'bKash Payment') {
-            // First check if address is filled
-            if (!validateAddress()) {
-                return;
-            }
-            setShowPaymentModal(true);
-        } else {
-            setTransactionId('');
-        }
-    };
-
     const placeOrderHandler = async (e) => {
         if (e && e.preventDefault) e.preventDefault();
 
@@ -110,9 +97,14 @@ const Checkout = () => {
             return;
         }
 
-        // 2. If bKash selected and no transaction ID entered yet, prompt modal
-        if (paymentMethod === 'bKash Payment' && !transactionId.trim()) {
+        // 2. Transaction ID is mandatory for bKash prepaid orders
+        if (!transactionId.trim()) {
             setShowPaymentModal(true);
+            showToast({
+                icon: 'warning',
+                title: 'অনুগ্রহ করে আপনার বিকাশ TrxID প্রদান করুন!',
+                timer: 3500,
+            });
             return;
         }
 
@@ -125,9 +117,9 @@ const Checkout = () => {
                     price: item.price
                 })),
                 shippingAddress,
-                paymentMethod,
+                paymentMethod: 'bKash Payment',
                 totalPrice: total,
-                transactionId: transactionId.trim() || null
+                transactionId: transactionId.trim()
             })).unwrap();
 
             dispatch(clearCart());
@@ -136,7 +128,7 @@ const Checkout = () => {
             await showOrderSuccess({
                 orderId: res.id || res._id,
                 total: total,
-                isBkash: paymentMethod === 'bKash Payment',
+                isBkash: true,
                 transactionId: transactionId.trim()
             });
 
@@ -317,123 +309,133 @@ const Checkout = () => {
                                 </p>
                                 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <label className={`cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}>
-                                        <input
-                                            type="radio"
-                                            name="shippingZone"
-                                            checked={isInsideBarishal}
-                                            onChange={() => setIsInsideBarishal(true)}
-                                            className="hidden"
-                                        />
+                                    <label
+                                        className={`block cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}
+                                    >
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="font-bold text-gray-900 text-sm sm:text-base">Inside Barishal Metro</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="shippingZone"
+                                                    value="inside"
+                                                    checked={isInsideBarishal}
+                                                    onChange={() => setIsInsideBarishal(true)}
+                                                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                                />
+                                                <span className="font-bold text-gray-900 text-sm sm:text-base">Inside Barishal Metro</span>
+                                            </div>
                                             <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(100 + extraWeightCharge)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-600">Fast 24-48h Delivery (Base ৳100 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
+                                        <p className="text-xs text-gray-600 pl-6">Fast 24-48h Delivery (Base ৳100 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
                                     </label>
-                                    <label className={`cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${!isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}>
-                                        <input
-                                            type="radio"
-                                            name="shippingZone"
-                                            checked={!isInsideBarishal}
-                                            onChange={() => setIsInsideBarishal(false)}
-                                            className="hidden"
-                                        />
+                                    <label
+                                        className={`block cursor-pointer border-2 p-4 sm:p-5 rounded-2xl transition-all ${!isInsideBarishal ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20' : 'border-gray-200 bg-white/60 hover:bg-emerald-50/30'}`}
+                                    >
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="font-bold text-gray-900 text-sm sm:text-base">Outside Barishal (All 64 Districts)</span>
-                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(150 + extraWeightCharge)}</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="radio"
+                                                    name="shippingZone"
+                                                    value="outside"
+                                                    checked={!isInsideBarishal}
+                                                    onChange={() => setIsInsideBarishal(false)}
+                                                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                                />
+                                                <span className="font-bold text-gray-900 text-sm sm:text-base">Outside Barishal (All 64 Districts)</span>
+                                            </div>
+                                            <span className="text-emerald-700 font-black text-base sm:text-lg">{formatCurrency(180 + extraWeightCharge)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-600">2-4 Days Moist-Locked Packaging (Base ৳150 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
+                                        <p className="text-xs text-gray-600 pl-6">2-4 Days Moist-Locked Packaging (Base ৳180 up to 1kg{extraKg > 0 ? ` + ৳${extraWeightCharge} extra wt` : ''})</p>
                                     </label>
                                 </div>
                             </div>
 
-                            {/* Payment Option */}
-                            <div className="glass rounded-3xl p-5 sm:p-8 border border-emerald-100">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-                                        <CreditCard className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">3. Payment Option</h2>
-                                        <p className="text-xs text-gray-500">Choose Cash on Delivery or bKash</p>
+                            {/* Payment Option: 100% Exclusive bKash Send Money */}
+                            <div className="glass rounded-3xl p-5 sm:p-8 border-2 border-pink-200/80 bg-gradient-to-br from-white via-pink-50/25 to-emerald-50/20 shadow-lg">
+                                <div className="flex items-center justify-between gap-3 mb-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#E2136E] to-[#BE185D] text-white flex items-center justify-center font-black text-xl shadow-md shadow-pink-500/25">
+                                            b
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h2 className="text-lg sm:text-2xl font-bold text-gray-900">3. Payment: bKash (বিকাশ)</h2>
+                                                <span className="text-[11px] bg-pink-100 text-[#E2136E] px-2.5 py-0.5 rounded-full font-bold">Prepaid Only</span>
+                                            </div>
+                                            <p className="text-xs text-gray-500">Send Money to Green Petals official account for instant dispatch</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3.5">
-                                    {/* Cash on Delivery */}
-                                    <label
-                                        className={`flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all ${
-                                            paymentMethod === 'Cash on Delivery'
-                                                ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-500/20'
-                                                : 'border-gray-200 bg-white/60 hover:bg-emerald-50/20'
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="paymentMethod"
-                                            value="Cash on Delivery"
-                                            checked={paymentMethod === 'Cash on Delivery'}
-                                            onChange={() => handleSelectPaymentMethod('Cash on Delivery')}
-                                            className="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500"
-                                        />
+                                {/* Send Money Account Card */}
+                                <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-pink-200 shadow-sm space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-pink-50/90 border border-pink-200/90">
                                         <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-gray-900 text-sm sm:text-base">Cash on Delivery (COD)</span>
-                                                <span className="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">Standard</span>
-                                            </div>
-                                            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-                                                Inspect your live plants and pots upon arrival, then pay cash directly to the delivery person.
-                                            </p>
+                                            <span className="text-[11px] font-bold text-[#E2136E] uppercase tracking-wider block">Official bKash (Personal / Send Money)</span>
+                                            <span className="text-xl sm:text-2xl font-mono font-black text-gray-900 tracking-wider">{BKASH_NUMBER}</span>
+                                            <span className="text-xs text-gray-600 block">Proprietor: <strong>Munnar Khanam</strong> (মুন্নার খানম)</span>
                                         </div>
-                                    </label>
+                                        <button
+                                            type="button"
+                                            onClick={copyBkashNumber}
+                                            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95 ${
+                                                copied ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-[#E2136E] hover:bg-[#c2105e] text-white shadow-pink-500/30'
+                                            }`}
+                                        >
+                                            {copied ? (
+                                                <>
+                                                    <Check className="w-4 h-4 text-white" />
+                                                    <span>Copied! (কপি হয়েছে)</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="w-4 h-4 text-white" />
+                                                    <span>Copy Number (নম্বর কপি করুন)</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
 
-                                    {/* bKash Payment */}
-                                    <label
-                                        className={`flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all ${
-                                            paymentMethod === 'bKash Payment'
-                                                ? 'border-[#E2136E] bg-pink-50/70 shadow-md ring-2 ring-pink-500/20'
-                                                : 'border-gray-200 bg-white/60 hover:bg-pink-50/20'
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="paymentMethod"
-                                            value="bKash Payment"
-                                            checked={paymentMethod === 'bKash Payment'}
-                                            onChange={() => handleSelectPaymentMethod('bKash Payment')}
-                                            className="mt-1 w-4 h-4 text-[#E2136E] focus:ring-pink-500"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-[#E2136E] text-sm sm:text-base">bKash Send Money</span>
-                                                    <span className="text-[11px] bg-[#E2136E] text-white px-2 py-0.5 rounded-full font-bold">Fast</span>
-                                                </div>
-                                                <span className="font-mono text-xs font-bold text-gray-800 bg-white px-2.5 py-0.5 rounded-lg border border-pink-200">
-                                                    {BKASH_NUMBER}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs sm:text-sm text-gray-600">
-                                                Send Money to Green Petals official bKash: <strong>{BKASH_NUMBER}</strong> and confirm your Transaction ID.
-                                            </p>
-                                            {transactionId && (
-                                                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center justify-between">
-                                                    <span>TrxID: <strong className="font-mono uppercase">{transactionId}</strong></span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setShowPaymentModal(true);
-                                                        }}
-                                                        className="underline text-emerald-900 ml-2"
-                                                    >
-                                                        Edit TrxID
-                                                    </button>
-                                                </div>
+                                    {/* 3 Step Instruction Pills */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-gray-700">
+                                        <div className="p-2.5 rounded-xl bg-gray-50/90 border border-gray-100 flex items-start gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-pink-100 text-[#E2136E] font-bold inline-flex items-center justify-center text-[11px] flex-shrink-0 mt-0.5">1</span>
+                                            <span>bKash অ্যাপে <strong>Send Money</strong> নির্বাচন করুন।</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-gray-50/90 border border-gray-100 flex items-start gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-pink-100 text-[#E2136E] font-bold inline-flex items-center justify-center text-[11px] flex-shrink-0 mt-0.5">2</span>
+                                            <span>নম্বর: <strong>{BKASH_NUMBER}</strong>, পরিমাণ: <strong>{formatCurrency(total)}</strong> দিন।</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-gray-50/90 border border-gray-100 flex items-start gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-pink-100 text-[#E2136E] font-bold inline-flex items-center justify-center text-[11px] flex-shrink-0 mt-0.5">3</span>
+                                            <span>পেমেন্ট শেষে প্রাপ্ত <strong>TrxID</strong> নিচে লিখুন।</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Inline TrxID input field */}
+                                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                                        <label className="block text-xs sm:text-sm font-bold text-gray-900">
+                                            bKash Transaction ID (TrxID) <span className="text-red-500">*</span>
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={transactionId}
+                                                onChange={(e) => setTransactionId(e.target.value.toUpperCase().trim())}
+                                                placeholder="যেমন: BL89K7M2X1"
+                                                className={`input-field pl-3.5 pr-10 font-mono font-bold tracking-wider uppercase text-sm sm:text-base ${
+                                                    transactionId.trim() ? 'border-emerald-500 ring-2 ring-emerald-400/20 bg-emerald-50/30' : 'border-pink-300'
+                                                }`}
+                                                required
+                                            />
+                                            {transactionId.trim() && (
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-600 absolute right-3 top-1/2 -translate-y-1/2" />
                                             )}
                                         </div>
-                                    </label>
+                                        <p className="text-[11px] text-gray-500">
+                                            পেমেন্ট নিশ্চিত করার পর এসএমএস বা অ্যাপের ইনবক্স থেকে ট্রানজেকশন আইডি এখানে লিখুন।
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -462,10 +464,6 @@ const Checkout = () => {
                                         <span className="font-semibold text-gray-900">{formatCurrency(subtotal)}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
-                                        <span>Plant Health & VAT (10%)</span>
-                                        <span className="font-semibold text-gray-900">{formatCurrency(tax)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-600">
                                         <div>
                                             <span className="block">Courier Delivery</span>
                                             <span className="text-[11px] text-gray-500">Weight: {totalWeightKg} kg ({totalItemsCount} plants)</span>
@@ -473,7 +471,7 @@ const Checkout = () => {
                                         <div className="text-right">
                                             <span className="font-semibold text-gray-900 block">{formatCurrency(shipping)}</span>
                                             <span className="text-[11px] text-emerald-700 font-medium">
-                                                {isInsideBarishal ? 'Barishal (৳100 base)' : 'Outside Barishal (৳150 base)'}
+                                                {isInsideBarishal ? 'Barishal (৳100 base)' : 'Outside Barishal (৳180 base)'}
                                                 {extraKg > 0 ? ` + ৳${extraWeightCharge} (${extraKg}kg extra)` : ''}
                                             </span>
                                         </div>
@@ -483,7 +481,7 @@ const Checkout = () => {
                                 <div className="flex justify-between items-baseline pt-1">
                                     <div>
                                         <span className="text-sm sm:text-base font-semibold text-gray-700 block">Total Payable</span>
-                                        <span className="text-[11px] text-gray-400">All taxes, packaging & courier included</span>
+                                        <span className="text-[11px] text-emerald-700 font-medium">0% Tax • Packaging & courier included</span>
                                     </div>
                                     <span className="text-2xl sm:text-3xl font-extrabold text-gradient">{formatCurrency(total)}</span>
                                 </div>

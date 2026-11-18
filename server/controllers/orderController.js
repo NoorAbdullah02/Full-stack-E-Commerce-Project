@@ -141,20 +141,16 @@ const generateOrderEmailHTML = (order, user) => {
                                             </div>
                                             
                                             <!-- Total Section -->
-                                            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); border-radius: 10px; margin-top: 20px;">
+                                            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #059669 0%, #0d9488 100%); border-radius: 10px; margin-top: 20px;">
                                                 <tr>
                                                     <td style="padding: 20px;">
                                                         <table width="100%" cellpadding="0" cellspacing="0">
                                                             <tr>
-                                                                <td style="color: #e0e7ff; font-size: 14px; padding: 5px 0;">Subtotal</td>
+                                                                <td style="color: #ecfdf5; font-size: 14px; padding: 5px 0;">Subtotal</td>
                                                                 <td align="right" style="color: #ffffff; font-size: 14px; font-weight: 500;">৳${Number(order.total).toFixed(2)}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td style="color: #e0e7ff; font-size: 14px; padding: 5px 0;">Shipping</td>
-                                                                <td align="right" style="color: #ffffff; font-size: 14px; font-weight: 500;">FREE</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td style="color: #e0e7ff; font-size: 14px; padding: 5px 0;">Tax</td>
+                                                                <td style="color: #ecfdf5; font-size: 14px; padding: 5px 0;">Tax (0%)</td>
                                                                 <td align="right" style="color: #ffffff; font-size: 14px; font-weight: 500;">৳0.00</td>
                                                             </tr>
                                                             <tr>
@@ -269,6 +265,19 @@ const addOrderItems = async (req, res) => {
             return res.status(400).json({ message: 'Shipping address is required' });
         }
 
+        // Green Petals Policy: Cash on Delivery disabled, only prepaid bKash accepted
+        if (paymentMethod === 'Cash on Delivery') {
+            return res.status(400).json({ 
+                message: 'Cash on Delivery is unavailable. Green Petals exclusively accepts prepaid bKash Send Money to 01715020391.' 
+            });
+        }
+
+        if (!transactionId || !String(transactionId).trim()) {
+            return res.status(400).json({ 
+                message: 'bKash Transaction ID (TrxID) is required to place your order.' 
+            });
+        }
+
         // 0. Check Stock Availability & Calculate Real Total Price
         let calculatedTotal = 0;
         const processedItems = [];
@@ -320,13 +329,11 @@ const addOrderItems = async (req, res) => {
             shippingAddress.city.toLowerCase().includes('barishal') ||
             shippingAddress.city.toLowerCase().includes('বরিশাল')
         );
-        const baseShipping = isBarishal ? 100 : 150;
+        const baseShipping = isBarishal ? 100 : 180;
         shippingCost = baseShipping + extraWeightCharge;
 
-        // Tax 10%
-        const tax = calculatedTotal * 0.1;
-
-        const finalTotal = calculatedTotal + tax + shippingCost;
+        // Tax 0% (Tax removed as per store policy)
+        const finalTotal = calculatedTotal + shippingCost;
 
         // 1. Transaction: Create Order & Reduce Stock Atomically
         const order = await prisma.$transaction(async (tx) => {

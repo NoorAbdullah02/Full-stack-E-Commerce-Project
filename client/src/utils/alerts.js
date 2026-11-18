@@ -104,7 +104,7 @@ export const showOrderSuccess = ({ orderId, total, isBkash, transactionId }) => 
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Payment:</span>
-                        <span class="font-semibold text-gray-800">${isBkash ? 'bKash (TrxID: ' + (transactionId || 'Verified') + ')' : 'Cash on Delivery'}</span>
+                        <span class="font-semibold text-gray-800">${transactionId ? 'bKash (TrxID: ' + transactionId + ')' : 'bKash Send Money'}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Nursery Hotline:</span>

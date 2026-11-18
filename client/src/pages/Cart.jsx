@@ -162,9 +162,6 @@ const Cart = () => {
     };
 
     const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
-    const tax = subtotal * 0.1;
-    const shipping = subtotal > 5000 ? 0 : 100;
-    const total = subtotal + tax + shipping;
 
     if (cartItems.length === 0) {
         return (
@@ -223,13 +220,9 @@ const Cart = () => {
                                     <span className="font-semibold">{formatCurrency(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-700">
-                                    <span>Tax (10%)</span>
-                                    <span className="font-semibold">{formatCurrency(tax)}</span>
-                                </div>
-                                <div className="flex justify-between text-gray-700">
                                     <div>
                                         <span className="block">Courier (Express Plant)</span>
-                                        <span className="text-[11px] text-gray-500">Tiered by weight & district (Barishal ৳100 / All BD ৳150)</span>
+                                        <span className="text-[11px] text-gray-500">Tiered by weight & district (Barishal ৳100 / Outside Barishal ৳180)</span>
                                     </div>
                                     <span className="font-semibold text-emerald-800">
                                         Calculated at checkout
@@ -238,8 +231,8 @@ const Cart = () => {
                             </div>
 
                             <div className="flex justify-between items-baseline">
-                                <span className="text-lg font-semibold">Estimated Items Total</span>
-                                <span className="text-3xl font-bold text-gradient">{formatCurrency(subtotal + tax)}</span>
+                                <span className="text-lg font-semibold">Subtotal</span>
+                                <span className="text-3xl font-bold text-gradient">{formatCurrency(subtotal)}</span>
                             </div>
 
                             <button

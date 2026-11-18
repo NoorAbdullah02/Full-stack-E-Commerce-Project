@@ -54,11 +54,12 @@ ABOUT GREEN PETALS:
 - Founder & Proprietor: Munnar Khanam (মুন্নার খানম)
 - Phone / Hotline / WhatsApp: 01768686120
 - Email: munner.ent@gmail.com
-- Facebook Profile: https://www.facebook.com/munnar.khanam
+- Facebook Official Page: https://www.facebook.com/share/1E2Y48eA5s/
 - Location & Nursery: Barishal, Bangladesh. We deliver healthy live plants nationwide across all 64 districts!
-- Delivery Rates: Inside Barishal Metro = Tk. 100 (24-48 hours express), Outside Barishal (All Over Bangladesh) = Tk. 150 (2-4 days with moisture-lock root protection packaging).
-- Payment Options: Cash on Delivery (COD) and bKash Mobile Payment.
+- Delivery Rates: Inside Barishal Metro = Tk. 100 (24-48 hours express), Outside Barishal (All 64 Districts) = Tk. 180 (2-4 days with moisture-lock root protection packaging). Weight tiered: +Tk. 20 per extra kg above 1kg.
+- Payment Option: Exclusive Prepaid bKash Send Money to 01715020391 (Proprietor: Munnar Khanam). Cash on Delivery is disabled so our botanical team can immediately prepare, moisture-pack, and express-dispatch living plants.
 - Official bKash Number: 01715020391 (Personal / Send Money to Munnar Khanam). Customers send money, copy the Transaction ID (TrxID), and confirm their order on the website.
+- Tax / VAT: 0% Tax (No tax or hidden charges).
 
 LIVE PRODUCT CATALOG & INVENTORY (DIRECT FROM STORE DATABASE):
 ${catalogContext}
@@ -66,16 +67,16 @@ ${catalogContext}
 YOUR INSTRUCTIONS:
 1. Language: Answer naturally in English, Bengali (বাংলা), or Banglish according to whatever the user uses.
 2. Store Awareness: Always use the exact prices, product names, categories, and stock from the live catalog above. If a customer asks about a plant, give its price in Tk. / ৳, mention its benefits (e.g. air purifying, low-light, pet safety), and basic care tips (watering, sunlight).
-3. Contact & Orders: If customers ask how to buy, guide them to add the plant to cart, proceed to checkout, enter their delivery address, and pay via bKash (01715020391) or Cash on Delivery. Provide Munnar Khanam's phone (01768686120) or Facebook link if they ask for personal consultation.
+3. Contact & Orders: If customers ask how to buy, guide them to add the plant to cart, proceed to checkout, enter their delivery address, and pay via bKash Send Money (01715020391). Provide Munnar Khanam's phone (01768686120) or Facebook link (https://www.facebook.com/share/1E2Y48eA5s/) if they ask for personal consultation.
 4. Tone: Warm, respectful, botanical, helpful, and concise. Use plant emojis (🌿, 🌱, 🌸, 🪴) where appropriate.`;
 
     if (!apiKey) {
         const lower = (message || '').toLowerCase();
-        if (lower.includes('bkash') || lower.includes('payment')) {
-            return "Our official bKash Send Money number is 01715020391 (Proprietor: Munnar Khanam). You can also choose Cash on Delivery! 🌿";
+        if (lower.includes('bkash') || lower.includes('payment') || lower.includes('cod') || lower.includes('cash')) {
+            return "Our official bKash Send Money number is 01715020391 (Proprietor: Munnar Khanam). Cash on Delivery is unavailable to ensure immediate plant packing & expedited delivery! 🌿";
         }
-        if (lower.includes('contact') || lower.includes('phone') || lower.includes('munnar')) {
-            return "You can reach Green Petals proprietor Munnar Khanam at 01768686120 or via email at munner.ent@gmail.com, or on Facebook: https://www.facebook.com/munnar.khanam 🌸";
+        if (lower.includes('contact') || lower.includes('phone') || lower.includes('munnar') || lower.includes('fb') || lower.includes('facebook')) {
+            return "You can reach Green Petals proprietor Munnar Khanam at 01768686120 or visit our official Facebook page: https://www.facebook.com/share/1E2Y48eA5s/ 🌸";
         }
         return "Welcome to Green Petals! 🌿 We have 22+ healthy botanical plant varieties. How can I help you pick the perfect plant today?";
     }
