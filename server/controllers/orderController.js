@@ -528,9 +528,38 @@ const getOrderById = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
+        const orderId = req.params.id;
+
+        const existingOrder = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: { items: { include: { product: true } } }
+        });
+
+        if (!existingOrder) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Manage inventory stock atomically on status changes
+        if (status === 'CANCELLED' && existingOrder.status !== 'CANCELLED') {
+            for (const item of existingOrder.items) {
+                await prisma.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { increment: item.quantity } }
+                });
+                console.log(`✅ Restored ${item.quantity} units of ${item.product.name} on cancellation`);
+            }
+        } else if (existingOrder.status === 'CANCELLED' && status !== 'CANCELLED') {
+            for (const item of existingOrder.items) {
+                await prisma.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { decrement: item.quantity } }
+                });
+                console.log(`🔄 Deducted ${item.quantity} units of ${item.product.name} on order reactivation`);
+            }
+        }
 
         const order = await prisma.order.update({
-            where: { id: req.params.id },
+            where: { id: orderId },
             data: { status },
             include: {
                 user: true,
@@ -666,7 +695,7 @@ const cancelOrder = async (req, res) => {
             return res.status(400).json({ message: 'Order is already cancelled' });
         }
 
-        if (order.status === 'DELIVERED') {
+        if (order.status === 'DELIVERED' && req.user.role !== 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
             return res.status(400).json({ message: 'Cannot cancel a delivered order' });
         }
 
@@ -720,8 +749,9 @@ const cancelOrder = async (req, res) => {
                             </div>
                             <p style="font-size: 14px; color: #6b7280;">If you have any questions, please contact our support team.</p>
                         </div>
-                        <div style="background-color: #1f2937; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px;">
-                            <p>AI E-commerce | noor@gmail.com | 01748269350</p>
+                        <div style="background-color: #064e3b; padding: 20px; text-align: center; color: #a7f3d0; font-size: 12px;">
+                            <p style="margin: 0; font-weight: bold;">Green Petals — Botanical Nursery & Living Plants Boutique</p>
+                            <p style="margin: 4px 0 0 0;">Proprietor: Munnar Khanam | Helpline: 01768686120 | munner.ent@gmail.com</p>
                         </div>
                     </div>
                 `

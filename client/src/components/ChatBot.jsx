@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { MessageCircle, X, Send, Sparkles, Bot, User, Sprout } from 'lucide-react';
 
 const ChatBot = () => {
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { role: 'model', content: 'Hello plant lover! 🌿 I am your Green Petals Assistant. Ask me about our live botanical collection, plant care, prices, bKash payment, or delivery across Bangladesh!' }
@@ -49,6 +51,10 @@ const ChatBot = () => {
             setLoading(false);
         }
     };
+
+    if (location.pathname.startsWith('/admin')) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-[100]">

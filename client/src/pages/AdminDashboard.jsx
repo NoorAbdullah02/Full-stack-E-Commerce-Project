@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { listProducts, createProduct, deleteProduct, generateDescription, getCategories, updateProduct } from '../redux/slices/productSlice';
 import { listAllOrders, updateOrderStatus, cancelOrder } from '../redux/slices/orderSlice';
 import { listUsers } from '../redux/slices/authSlice';
 import { formatCurrency } from '../utils/currency';
 import { showConfirm, showSuccess, showError, showToast } from '../utils/alerts';
-import { Package, ShoppingCart, Sparkles, Trash2, Upload, User, Edit, Plus, TrendingUp, BarChart3, PieChart, XCircle } from 'lucide-react';
+import { Package, ShoppingCart, Sparkles, Trash2, Upload, User, Edit, Plus, TrendingUp, BarChart3, PieChart, XCircle, Camera, Image as ImageIcon } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, PieChart as RePieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
     const dispatch = useDispatch();
+    const galleryInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
     const [activeTab, setActiveTab] = useState('analytics');
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -638,68 +640,140 @@ const AdminDashboard = () => {
                                             />
                                             <span className="text-[10px] text-gray-400 mt-0.5 block">Units available at Barishal nursery</span>
                                         </div>
-
-                                        <div>
-                                            <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
-                                                Category (ক্যাটাগরি) <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                value={categoryId}
-                                                onChange={(e) => setCategoryId(e.target.value)}
-                                                className="input-glass w-full text-gray-800 font-medium"
-                                                required
-                                            >
-                                                <option value="">Select Category</option>
-                                                {categories.map((cat) => (
-                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                ))}
-                                            </select>
-                                            <span className="text-[10px] text-gray-400 mt-0.5 block">Plant classification</span>
-                                        </div>
                                     </div>
 
-                                    {/* Field 5: Image Upload & Preview */}
-                                    <div className="border border-dashed border-emerald-300 bg-emerald-50/30 rounded-2xl p-4 sm:p-5">
+                                    {/* Field 4: Category Selection as Touch-Friendly Interactive Chips */}
+                                    <div>
                                         <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
-                                            Product Image (গাছের ছবি আপলোড ও প্রিভিউ)
+                                            Category (ক্যাটাগরি নির্বাচন করুন) <span className="text-red-500">*</span>
                                         </label>
-                                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                                            {/* Preview box */}
-                                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 border border-emerald-200 flex-shrink-0 flex items-center justify-center relative">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {categories.map((cat) => {
+                                                const isSelected = categoryId === cat.id;
+                                                return (
+                                                    <button
+                                                        key={cat.id}
+                                                        type="button"
+                                                        onClick={() => setCategoryId(cat.id)}
+                                                        className={`flex items-center gap-2 p-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-left border ${
+                                                            isSelected
+                                                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300 scale-[1.02]'
+                                                                : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+                                                        }`}
+                                                    >
+                                                        <span className="text-base flex-shrink-0">
+                                                            {cat.name.includes('Indoor') ? '🪴' :
+                                                             cat.name.includes('Flowering') ? '🌸' :
+                                                             cat.name.includes('Succulent') ? '🌵' :
+                                                             cat.name.includes('Air') ? '🍃' :
+                                                             cat.name.includes('Pot') ? '🏺' : '🧪'}
+                                                        </span>
+                                                        <span className="truncate">{cat.name}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <input type="text" value={categoryId} required className="sr-only" onChange={() => {}} />
+                                        <span className="text-[10px] text-gray-400 mt-1 block">Tap a category chip above to assign to this plant</span>
+                                    </div>
+
+                                    {/* Field 5: Universal Touch-Friendly Image Upload & Preview */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-xs sm:text-sm font-bold text-gray-800">
+                                                Product Image (গাছের ছবি নির্বাচন করুন) <span className="text-red-500">*</span>
+                                            </label>
+                                            {imagePreview && (
+                                                <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                    ✓ Photo Ready
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Big Interactive Preview & Dropzone */}
+                                        <div 
+                                            onClick={() => galleryInputRef.current?.click()}
+                                            className={`w-full rounded-2xl p-4 sm:p-5 border-2 border-dashed transition-all cursor-pointer flex flex-col sm:flex-row items-center gap-4 ${
+                                                imagePreview
+                                                    ? 'border-emerald-400 bg-emerald-50/40 hover:bg-emerald-50/70'
+                                                    : 'border-emerald-300 bg-white hover:border-emerald-500 hover:bg-emerald-50/30'
+                                            }`}
+                                        >
+                                            {/* Preview Box */}
+                                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-gray-100 border-2 border-emerald-200 flex-shrink-0 flex items-center justify-center relative shadow-sm">
                                                 {imagePreview ? (
-                                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                    <img src={imagePreview} alt="Plant Preview" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <span className="text-xs text-gray-400 text-center px-2">No Image</span>
+                                                    <div className="flex flex-col items-center justify-center text-gray-400 p-2 text-center">
+                                                        <Upload className="w-8 h-8 text-emerald-600 mb-1" />
+                                                        <span className="text-[11px] font-bold text-emerald-800">Tap to Select</span>
+                                                    </div>
                                                 )}
                                             </div>
 
-                                            <div className="flex-1 space-y-2 text-center sm:text-left">
-                                                <label className="inline-flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-xs sm:text-sm font-bold transition-all shadow-sm">
-                                                    <Upload className="w-4 h-4 text-emerald-600" />
-                                                    <span>Choose Photo from Device</span>
-                                                    <input
-                                                        type="file"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files[0];
-                                                            if (file) {
-                                                                setImage(file);
-                                                                setImagePreview(URL.createObjectURL(file));
-                                                            }
-                                                        }}
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                    />
-                                                </label>
-                                                {image && (
-                                                    <p className="text-xs text-emerald-700 font-semibold truncate">
-                                                        📎 Selected: {image.name}
-                                                    </p>
-                                                )}
-                                                <p className="text-[11px] text-gray-400">
-                                                    Square 1:1 or 4:5 recommended. Cloudinary optimized on upload.
+                                            {/* Instructions */}
+                                            <div className="flex-1 text-center sm:text-left space-y-1">
+                                                <h4 className="text-sm font-bold text-gray-800">
+                                                    {image ? image.name : (imagePreview ? 'Current Active Photo' : 'Upload Plant Photo')}
+                                                </h4>
+                                                <p className="text-xs text-gray-500">
+                                                    Tap anywhere here or use the quick buttons below to choose directly from your phone.
+                                                </p>
+                                                <p className="text-[11px] text-emerald-700 font-medium">
+                                                    Supports Gallery, Camera, Files (JPG, PNG, WEBP, HEIC)
                                                 </p>
                                             </div>
                                         </div>
+
+                                        {/* Dedicated Mobile Quick Buttons */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => cameraInputRef.current?.click()}
+                                                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-md hover:from-emerald-700 hover:to-teal-700 active:scale-98 transition-all"
+                                            >
+                                                <Camera className="w-4 h-4" />
+                                                <span>📸 Camera (ছবি তুলুন)</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => galleryInputRef.current?.click()}
+                                                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-emerald-500 text-emerald-800 font-bold text-xs sm:text-sm shadow-sm hover:bg-emerald-50 active:scale-98 transition-all"
+                                            >
+                                                <ImageIcon className="w-4 h-4" />
+                                                <span>🖼️ Gallery / Files</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Hidden native inputs */}
+                                        <input
+                                            ref={galleryInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="sr-only"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setImage(file);
+                                                    setImagePreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                        />
+                                        <input
+                                            ref={cameraInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            className="sr-only"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setImage(file);
+                                                    setImagePreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                        />
                                     </div>
 
                                     {/* Action Buttons */}
@@ -1001,7 +1075,15 @@ const AdminDashboard = () => {
                                                         <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Status:</label>
                                                         <select
                                                             value={order.status}
-                                                            onChange={(e) => dispatch(updateOrderStatus({ id: order.id, status: e.target.value }))}
+                                                            onChange={(e) => {
+                                                                const newStatus = e.target.value;
+                                                                if (newStatus === 'CANCELLED') {
+                                                                    handleCancelOrder(order.id);
+                                                                } else {
+                                                                    dispatch(updateOrderStatus({ id: order.id, status: newStatus }));
+                                                                    showToast({ icon: 'success', title: `Order Status: ${newStatus}` });
+                                                                }
+                                                            }}
                                                             className="w-full text-xs font-bold py-1.5 px-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800"
                                                         >
                                                             <option value="PENDING">⏳ PENDING</option>
@@ -1010,16 +1092,27 @@ const AdminDashboard = () => {
                                                             <option value="ON_THE_WAY">🚚 ON THE WAY</option>
                                                             <option value="DELIVERED">✅ DELIVERED</option>
                                                             <option value="PAID">💵 PAID</option>
-                                                            <option value="CANCELLED" disabled>❌ CANCELLED</option>
+                                                            <option value="CANCELLED">❌ CANCELLED</option>
                                                         </select>
                                                     </div>
-                                                    {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
+                                                    {order.status !== 'CANCELLED' ? (
                                                         <button
                                                             onClick={() => handleCancelOrder(order.id)}
-                                                            className="px-3 py-1.5 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-xl font-bold self-end"
+                                                            className="px-3 py-1.5 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-xl font-bold self-end transition-all active:scale-95"
                                                             title="Cancel Order"
                                                         >
-                                                            Cancel
+                                                            Cancel Order
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => {
+                                                                dispatch(updateOrderStatus({ id: order.id, status: 'PROCESSING' }));
+                                                                showToast({ icon: 'success', title: 'Order Reactivated to Processing' });
+                                                            }}
+                                                            className="px-3 py-1.5 text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl font-bold self-end transition-all active:scale-95"
+                                                            title="Reactivate Order"
+                                                        >
+                                                            Reactivate
                                                         </button>
                                                     )}
                                                 </div>
@@ -1110,9 +1203,16 @@ const AdminDashboard = () => {
                                                             <div className="flex flex-wrap items-center gap-2">
                                                                 <select
                                                                     value={order.status}
-                                                                    onChange={(e) => dispatch(updateOrderStatus({ id: order.id, status: e.target.value }))}
-                                                                    className="text-xs p-1 rounded border border-gray-300 bg-white"
-                                                                    disabled={order.status === 'CANCELLED' || order.status === 'DELIVERED'}
+                                                                    onChange={(e) => {
+                                                                        const newStatus = e.target.value;
+                                                                        if (newStatus === 'CANCELLED') {
+                                                                            handleCancelOrder(order.id);
+                                                                        } else {
+                                                                            dispatch(updateOrderStatus({ id: order.id, status: newStatus }));
+                                                                            showToast({ icon: 'success', title: `Order Status: ${newStatus}` });
+                                                                        }
+                                                                    }}
+                                                                    className="text-xs p-1.5 rounded-lg border border-gray-300 bg-white font-medium"
                                                                 >
                                                                     <option value="PENDING">Pending</option>
                                                                     <option value="PROCESSING">Processing</option>
@@ -1120,16 +1220,27 @@ const AdminDashboard = () => {
                                                                     <option value="ON_THE_WAY">On the Way</option>
                                                                     <option value="DELIVERED">Delivered</option>
                                                                     <option value="PAID">Paid</option>
-                                                                    <option value="CANCELLED" disabled>Cancelled</option>
+                                                                    <option value="CANCELLED">Cancelled</option>
                                                                 </select>
 
-                                                                {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
+                                                                {order.status !== 'CANCELLED' ? (
                                                                     <button
                                                                         onClick={() => handleCancelOrder(order.id)}
                                                                         className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                                                                         title="Cancel Order"
                                                                     >
                                                                         <XCircle className="w-5 h-5" />
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            dispatch(updateOrderStatus({ id: order.id, status: 'PROCESSING' }));
+                                                                            showToast({ icon: 'success', title: 'Order Reactivated' });
+                                                                        }}
+                                                                        className="text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded font-bold hover:bg-emerald-100"
+                                                                        title="Reactivate Order"
+                                                                    >
+                                                                        Reactivate
                                                                     </button>
                                                                 )}
                                                             </div>
