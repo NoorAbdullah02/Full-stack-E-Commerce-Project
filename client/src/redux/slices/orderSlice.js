@@ -3,7 +3,7 @@ import axios from 'axios';
 import { clearCart } from './cartSlice';
 import { logout } from './authSlice';
 
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL || '';
 
 const getConfig = (getState) => {
     const { auth: { userInfo } } = getState();

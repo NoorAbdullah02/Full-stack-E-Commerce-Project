@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getOrderDetails } from '../redux/slices/orderSlice';
 import { formatCurrency } from '../utils/currency';
+import { showSuccess, showError, showToast } from '../utils/alerts';
 import { Package, Truck, CheckCircle, Clock, MapPin, ChevronLeft, Download, XCircle } from 'lucide-react';
 import axios from 'axios';
 
@@ -47,7 +48,7 @@ const OrderTracking = () => {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error('Error downloading invoice:', err);
-            alert('Failed to download invoice. Please try again.');
+            showError('ডাউনলোড ব্যর্থ হয়েছে', 'ইনভয়েস ডাউনলোড করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।');
         } finally {
             setDownloading(false);
         }
@@ -71,10 +72,10 @@ const OrderTracking = () => {
             // Refresh order details
             dispatch(getOrderDetails(id));
             setShowCancelModal(false);
-            alert('Order cancelled successfully!');
+            showSuccess('অর্ডার বাতিল সম্পন্ন', 'আপনার অর্ডারটি সফলভাবে বাতিল করা হয়েছে এবং পণ্যের স্টক ফেরত দেওয়া হয়েছে।');
         } catch (err) {
             console.error('Error cancelling order:', err);
-            alert(err.response?.data?.message || 'Failed to cancel order. Please try again.');
+            showError('অর্ডার বাতিল ব্যর্থ', err.response?.data?.message || 'অর্ডার বাতিল করা সম্ভব হয়নি।');
         } finally {
             setCancelling(false);
         }
@@ -231,8 +232,8 @@ const OrderTracking = () => {
                                     <p>{order.shippingAddress.address}</p>
                                     <p>{order.shippingAddress.city}, {order.shippingAddress.postalCode}</p>
                                     <p>{order.shippingAddress.country}</p>
-                                    <p className="mt-2 text-xs text-indigo-600 font-medium bg-indigo-50 inline-block px-2 py-1 rounded">
-                                        {order.shippingAddress.city.toLowerCase().includes('dhaka') ? 'Inside Dhaka' : 'Outside Dhaka'}
+                                    <p className="mt-2 text-xs text-emerald-700 font-semibold bg-emerald-50 inline-block px-2.5 py-1 rounded-lg border border-emerald-100">
+                                        {order.shippingAddress.city.toLowerCase().includes('barishal') ? 'Inside Barishal Metro' : 'Outside Barishal (All BD)'}
                                     </p>
                                 </div>
                             ) : (

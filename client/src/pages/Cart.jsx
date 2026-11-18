@@ -90,12 +90,12 @@ const CartItem = ({ item, navigate }) => {
     return (
         <div className="glass rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center hover:shadow-lg transition-all duration-300">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 flex-shrink-0 cursor-pointer" onClick={() => navigate(`/product/${item.productId}`)}>
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                <img src={item.image || 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400'} alt={item.name || 'Plant'} className="w-full h-full object-cover" />
             </div>
 
             <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2 truncate cursor-pointer hover:text-indigo-600" onClick={() => navigate(`/product/${item.productId}`)}>{item.name}</h3>
-                <p className="text-2xl sm:text-2xl font-bold text-gradient">{formatCurrency(item.price)}</p>
+                <h3 className="font-semibold text-lg text-gray-900 mb-2 truncate cursor-pointer hover:text-emerald-600" onClick={() => navigate(`/product/${item.productId}`)}>{item.name || 'Botanical Plant'}</h3>
+                <p className="text-2xl sm:text-2xl font-bold text-gradient">{formatCurrency(item.price || 0)}</p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
@@ -160,7 +160,7 @@ const Cart = () => {
         navigate('/checkout');
     };
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
     const tax = subtotal * 0.1;
     const shipping = subtotal > 5000 ? 0 : 100;
     const total = subtotal + tax + shipping;

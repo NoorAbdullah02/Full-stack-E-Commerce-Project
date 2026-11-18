@@ -4,6 +4,7 @@ import { listProducts, createProduct, deleteProduct, generateDescription, getCat
 import { listAllOrders, updateOrderStatus, cancelOrder } from '../redux/slices/orderSlice';
 import { listUsers } from '../redux/slices/authSlice';
 import { formatCurrency } from '../utils/currency';
+import { showConfirm, showSuccess, showError, showToast } from '../utils/alerts';
 import { Package, ShoppingCart, Sparkles, Trash2, Upload, User, Edit, Plus, TrendingUp, BarChart3, PieChart, XCircle } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, PieChart as RePieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -29,6 +30,10 @@ const AdminDashboard = () => {
     const [stock, setStock] = useState('');
     const [categoryId, setCategoryId] = useState('');
     const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [imageUrl, setImageUrl] = useState('');
+    const [aspectRatio, setAspectRatio] = useState('1:1');
+    const [fitMode, setFitMode] = useState('fill');
 
     const { products, categories, loading: loadingProducts } = useSelector((state) => state.product);
     const { orders, loading: loadingOrders } = useSelector((state) => state.order);
@@ -62,7 +67,7 @@ const AdminDashboard = () => {
         };
 
         if (!name || !price || stock === '' || !categoryId) {
-            alert('Please fill in all required fields');
+            showToast({ icon: 'warning', title: 'অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন' });
             return;
         }
 
@@ -76,7 +81,10 @@ const AdminDashboard = () => {
         data.append('description', description);
         data.append('stock', Number(stock).toString());
         data.append('categoryId', categoryId);
+        data.append('aspectRatio', aspectRatio);
+        data.append('fitMode', fitMode);
         if (image) data.append('images', image);
+        if (imageUrl) data.append('imageUrl', imageUrl);
 
         try {
             if (isEditing) {
@@ -85,35 +93,40 @@ const AdminDashboard = () => {
                     id: editProductId,
                     productData: data // Pass FormData instad of JSON object
                 })).unwrap();
+                showToast({ icon: 'success', title: `🌿 "${name}" সফলভাবে আপডেট হয়েছে!` });
             } else {
                 await dispatch(createProduct(data)).unwrap();
+                showToast({ icon: 'success', title: `🌱 "${name}" নতুন গাছ হিসেবে যুক্ত হয়েছে!` });
             }
 
             setIsAddingProduct(false);
             resetForm();
         } catch (err) {
             console.error('Failed to save product:', err);
-            alert(`Failed to save product: ${err.message || err}`);
+            showError('সংরক্ষণ ব্যর্থ হয়েছে', err.message || err);
         }
     };
 
     const resetForm = () => {
-        setName(''); setPrice(''); setOriginalPrice(''); setDiscount(''); setDescription(''); setStock(''); setImage(null); setCategoryId('');
+        setName(''); setPrice(''); setOriginalPrice(''); setDiscount(''); setDescription(''); setStock(''); setImage(null); setImagePreview(null); setCategoryId('');
         setIsEditing(false);
         setEditProductId(null);
     };
 
     const handleEditProduct = (product) => {
-        setName(product.name);
-        setPrice(product.price);
+        setName(product.name || '');
+        setPrice(product.price || '');
         setOriginalPrice(product.originalPrice || '');
         setDiscount(product.discount || '');
-        setDescription(product.description);
-        setStock(product.stock);
-        setCategoryId(product.categoryId);
+        setDescription(product.description || '');
+        setStock(product.stock || '');
+        setCategoryId(product.categoryId || '');
+        setImage(null);
+        setImagePreview(product.images?.[0] || product.image || null);
         setEditProductId(product.id);
         setIsEditing(true);
         setIsAddingProduct(true);
+        window.scrollTo({ top: 300, behavior: 'smooth' });
     };
 
     // Auto-calculate Discount/Price
@@ -128,23 +141,36 @@ const AdminDashboard = () => {
         }
     }, [originalPrice, discount]);
 
-    const handleDeleteProduct = async (id) => {
-        if (window.confirm('Are you sure you want to delete this product?')) {
+    const handleDeleteProduct = async (product) => {
+        const prodId = typeof product === 'object' ? product.id : product;
+        const prodName = typeof product === 'object' ? product.name : 'this product';
+        const isConfirmed = await showConfirm({
+            title: 'গাছটি কি মুছে ফেলতে চান?',
+            text: `"${prodName}" ক্যাটালগ থেকে সম্পূর্ণভাবে ডিলিট হয়ে যাবে।`,
+            confirmButtonText: 'হ্যাঁ, ডিলিট করুন 🗑️',
+            cancelButtonText: 'বাতিল'
+        });
+        if (isConfirmed) {
             try {
-                await dispatch(deleteProduct(id)).unwrap();
-                // Optional: success notification
+                await dispatch(deleteProduct(prodId)).unwrap();
+                showToast({ icon: 'success', title: `🌿 "${prodName}" সফলভাবে মুছে ফেলা হয়েছে!` });
             } catch (err) {
                 console.error('Failed to delete product:', err);
-                alert(`Failed to delete product: ${err.message || err}`);
+                showError('মুছে ফেলতে সমস্যা হয়েছে', err.message || err);
             }
         }
     };
 
     const handleGenerateDescription = async () => {
-        if (!name) return alert('Please enter product name first');
-        const res = await dispatch(generateDescription(`Write a compelling product description for: ${name}`));
+        if (!name) {
+            showToast({ icon: 'warning', title: 'প্রথমে গাছের নাম লিখুন (Enter plant name first)' });
+            return;
+        }
+        showToast({ icon: 'info', title: 'AI বিবরণ তৈরি করছে...', timer: 1500 });
+        const res = await dispatch(generateDescription(`Write a compelling botanical plant description and care guide for: ${name}`));
         if (res.payload) {
             setDescription(res.payload);
+            showToast({ icon: 'success', title: 'বিবরণ প্রস্তুত সম্পন্ন!' });
         }
     };
 
@@ -161,16 +187,40 @@ const AdminDashboard = () => {
     }) || [];
 
     // Bulk order actions
-    const handleBulkStatusUpdate = (status) => {
+    const handleBulkStatusUpdate = async (status) => {
         if (selectedOrders.length === 0) {
-            alert('Please select orders first');
+            showToast({ icon: 'warning', title: 'অনুগ্রহ করে প্রথমে অর্ডার নির্বাচন করুন' });
             return;
         }
-        if (window.confirm(`Update ${selectedOrders.length} orders to ${status}?`)) {
+        const isConfirmed = await showConfirm({
+            title: 'অর্ডারের স্ট্যাটাস পরিবর্তন করবেন?',
+            text: `${selectedOrders.length}টি অর্ডারের স্ট্যাটাস "${status}" করা হবে।`,
+            confirmButtonText: 'হ্যাঁ, পরিবর্তন করুন ✅',
+            cancelButtonText: 'বাতিল'
+        });
+        if (isConfirmed) {
             selectedOrders.forEach(orderId => {
                 dispatch(updateOrderStatus({ id: orderId, status }));
             });
             setSelectedOrders([]);
+            showToast({ icon: 'success', title: 'স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে' });
+        }
+    };
+
+    const handleCancelOrder = async (orderId) => {
+        const isConfirmed = await showConfirm({
+            title: 'অর্ডার বাতিল করবেন?',
+            text: `অর্ডার #${orderId.slice(0, 8)} বাতিল করা হবে এবং ইনভেন্টরি স্টক ফিরিয়ে দেওয়া হবে।`,
+            confirmButtonText: 'হ্যাঁ, অর্ডার বাতিল করুন',
+            cancelButtonText: 'না'
+        });
+        if (isConfirmed) {
+            try {
+                await dispatch(cancelOrder(orderId)).unwrap();
+                showToast({ icon: 'success', title: 'অর্ডার বাতিল ও স্টক পুনঃস্থাপন সম্পন্ন' });
+            } catch (err) {
+                showError('অর্ডার বাতিল ব্যর্থ', err.message || err);
+            }
         }
     };
 
@@ -459,101 +509,220 @@ const AdminDashboard = () => {
                         )}
 
                         {isAddingProduct && (
-                            <div className="glass rounded-2xl p-8 space-y-6">
-                                <h3 className="text-xl font-bold">{isEditing ? 'Edit Product' : 'New Product'}</h3>
-                                <form onSubmit={handleCreateProduct} className="space-y-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Product Name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        className="input-glass w-full"
-                                        required
-                                    />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input
-                                            type="number"
-                                            placeholder="Regular Price (৳)"
-                                            value={originalPrice}
-                                            onChange={(e) => setOriginalPrice(e.target.value)}
-                                            className="input-glass w-full"
-                                        />
-                                        <input
-                                            type="number"
-                                            placeholder="Discount (%)"
-                                            value={discount}
-                                            onChange={(e) => setDiscount(e.target.value)}
-                                            className="input-glass w-full"
-                                        />
-                                    </div>
-                                    <input
-                                        type="number"
-                                        placeholder="Selling Price (Auto-calculated)"
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
-                                        className="input-glass w-full bg-gray-50"
-                                        required
-                                        readOnly
-                                    />
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Description"
-                                            value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            className="input-glass flex-1"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleGenerateDescription}
-                                            className="btn-glass px-6 flex items-center gap-2"
-                                        >
-                                            <Sparkles className="w-4 h-4" />
-                                            AI Generate
-                                        </button>
-                                    </div>
-
-                                    <input
-                                        type="number"
-                                        placeholder="Stock"
-                                        value={stock}
-                                        onChange={(e) => setStock(e.target.value)}
-                                        className="input-glass w-full"
-                                        required
-                                    />
-                                    <select
-                                        value={categoryId}
-                                        onChange={(e) => setCategoryId(e.target.value)}
-                                        className="input-glass w-full text-gray-700"
-                                        required
-                                    >
-                                        <option value="">Select Category</option>
-                                        {categories.map((cat) => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </select>
-                                    <div className="flex items-center gap-4">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <Upload className="w-5 h-5 text-indigo-600" />
-                                            <span className="text-sm font-medium">Upload Image</span>
-                                            <input
-                                                type="file"
-                                                onChange={(e) => setImage(e.target.files[0])}
-                                                className="hidden"
-                                                accept="image/*"
-                                            />
-                                        </label>
-                                        {image && <span className="text-sm text-gray-600">{image.name}</span>}
+                            <div className="glass rounded-3xl p-6 sm:p-8 space-y-6 border-2 border-emerald-300 shadow-xl bg-white/95">
+                                <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+                                    <div>
+                                        <h3 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
+                                            {isEditing ? '✏️ Edit Plant / গাছ এডিট করুন' : '🌱 New Plant / নতুন গাছ যুক্ত করুন'}
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                            {isEditing ? 'Update plant details, prices, discounts, stock, and photography.' : 'Add a fresh plant to the Green Petals live catalog.'}
+                                        </p>
                                     </div>
                                     <button
-                                        type="submit"
-                                        disabled={loadingProducts}
-                                        className="btn-primary w-full h-12 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
+                                        type="button"
+                                        onClick={() => {
+                                            resetForm();
+                                            setIsAddingProduct(false);
+                                        }}
+                                        className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                                        title="Cancel"
                                     >
-                                        <Plus className="w-5 h-5" />
-                                        {loadingProducts ? 'Saving...' : (isEditing ? 'Update Product' : 'Create Product')}
+                                        <XCircle className="w-6 h-6" />
                                     </button>
+                                </div>
+
+                                <form onSubmit={handleCreateProduct} className="space-y-5">
+                                    {/* Field 1: Plant Name */}
+                                    <div>
+                                        <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5 flex items-center justify-between">
+                                            <span>Product Name (গাছের নাম) <span className="text-red-500">*</span></span>
+                                            <span className="text-[11px] font-normal text-gray-400">e.g. Monstera Deliciosa, Areca Palm</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter plant name"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="input-glass w-full text-base font-semibold"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Field 2: Pricing Row */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">
+                                                Regular Price (মূল দাম - ৳)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                placeholder="e.g. 2100"
+                                                value={originalPrice}
+                                                onChange={(e) => setOriginalPrice(e.target.value)}
+                                                className="input-glass w-full bg-white font-mono"
+                                            />
+                                            <span className="text-[10px] text-gray-400 mt-0.5 block">Original catalog price</span>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">
+                                                Discount (ছাড় - %)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                placeholder="e.g. 20"
+                                                value={discount}
+                                                onChange={(e) => setDiscount(e.target.value)}
+                                                className="input-glass w-full bg-white font-mono"
+                                            />
+                                            <span className="text-[10px] text-gray-400 mt-0.5 block">Discount percentage</span>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-emerald-900 mb-1 flex items-center gap-1">
+                                                <span>Final Selling Price (বিক্রয় মূল্য - ৳)</span>
+                                                <span className="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-bold">Auto</span>
+                                            </label>
+                                            <input
+                                                type="number"
+                                                placeholder="Selling Price"
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
+                                                className="input-glass w-full bg-emerald-100/60 font-bold font-mono text-emerald-900 cursor-not-allowed"
+                                                required
+                                                readOnly
+                                            />
+                                            <span className="text-[10px] text-emerald-700 mt-0.5 block">Customer checkout price</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Field 3: Description with AI Generator */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <label className="block text-xs sm:text-sm font-bold text-gray-800">
+                                                Plant Description & Care Tips (গাছের বিবরণ ও যত্ন) <span className="text-red-500">*</span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={handleGenerateDescription}
+                                                className="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 px-3 py-1 rounded-xl flex items-center gap-1.5 font-bold transition-all active:scale-95 shadow-sm"
+                                            >
+                                                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                                                AI Generate Description
+                                            </button>
+                                        </div>
+                                        <textarea
+                                            rows={4}
+                                            placeholder="Enter botanical description, watering, light requirements..."
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            className="input-glass w-full text-sm leading-relaxed"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Field 4: Stock & Category */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
+                                                Available Stock Quantity (মজুদ সংখ্যা) <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="number"
+                                                placeholder="e.g. 15"
+                                                value={stock}
+                                                onChange={(e) => setStock(e.target.value)}
+                                                className="input-glass w-full font-mono font-semibold"
+                                                required
+                                            />
+                                            <span className="text-[10px] text-gray-400 mt-0.5 block">Units available at Barishal nursery</span>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-1.5">
+                                                Category (ক্যাটাগরি) <span className="text-red-500">*</span>
+                                            </label>
+                                            <select
+                                                value={categoryId}
+                                                onChange={(e) => setCategoryId(e.target.value)}
+                                                className="input-glass w-full text-gray-800 font-medium"
+                                                required
+                                            >
+                                                <option value="">Select Category</option>
+                                                {categories.map((cat) => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                ))}
+                                            </select>
+                                            <span className="text-[10px] text-gray-400 mt-0.5 block">Plant classification</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Field 5: Image Upload & Preview */}
+                                    <div className="border border-dashed border-emerald-300 bg-emerald-50/30 rounded-2xl p-4 sm:p-5">
+                                        <label className="block text-xs sm:text-sm font-bold text-gray-800 mb-2">
+                                            Product Image (গাছের ছবি আপলোড ও প্রিভিউ)
+                                        </label>
+                                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                                            {/* Preview box */}
+                                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 border border-emerald-200 flex-shrink-0 flex items-center justify-center relative">
+                                                {imagePreview ? (
+                                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-xs text-gray-400 text-center px-2">No Image</span>
+                                                )}
+                                            </div>
+
+                                            <div className="flex-1 space-y-2 text-center sm:text-left">
+                                                <label className="inline-flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-xl bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 text-xs sm:text-sm font-bold transition-all shadow-sm">
+                                                    <Upload className="w-4 h-4 text-emerald-600" />
+                                                    <span>Choose Photo from Device</span>
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files[0];
+                                                            if (file) {
+                                                                setImage(file);
+                                                                setImagePreview(URL.createObjectURL(file));
+                                                            }
+                                                        }}
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                    />
+                                                </label>
+                                                {image && (
+                                                    <p className="text-xs text-emerald-700 font-semibold truncate">
+                                                        📎 Selected: {image.name}
+                                                    </p>
+                                                )}
+                                                <p className="text-[11px] text-gray-400">
+                                                    Square 1:1 or 4:5 recommended. Cloudinary optimized on upload.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <button
+                                            type="submit"
+                                            disabled={loadingProducts}
+                                            className="btn-primary flex-1 h-12 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-emerald-600/30 disabled:opacity-50"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                            {loadingProducts ? 'Saving to Database...' : (isEditing ? 'Save & Update Plant' : 'Publish New Plant')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                resetForm();
+                                                setIsAddingProduct(false);
+                                            }}
+                                            className="px-6 h-12 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold text-sm transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         )}
@@ -563,69 +732,114 @@ const AdminDashboard = () => {
                                 <div className="animate-pulse text-gray-600">Loading products...</div>
                             </div>
                         ) : (
-                            <div className="glass rounded-2xl overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left font-semibold">Image</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Name</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Price</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Stock</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {products.map((product) => (
-                                                <tr key={product.id} className="border-b border-gray-100 hover:bg-white/50 transition-colors">
-                                                    <td className="px-6 py-4">
-                                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                                                            <img
-                                                                src={product.images?.[0] || 'https://via.placeholder.com/150'}
-                                                                alt={product.name}
-                                                                className="w-full h-full object-cover"
-                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
-                                                            />
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 font-medium">{product.name}</td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-bold">{formatCurrency(product.price)}</span>
-                                                            {product.discount > 0 && (
-                                                                <span className="text-xs text-gray-400 line-through">
-                                                                    {formatCurrency(product.originalPrice)}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`badge ${product.stock > 0 ? 'badge-success' : 'badge-error'}`}>
-                                                            {product.stock}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleEditProduct(product)}
-                                                                className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors"
-                                                            >
-                                                                <Edit className="w-5 h-5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteProduct(product.id)}
-                                                                className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                                                            >
-                                                                <Trash2 className="w-5 h-5" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                            <>
+                                {/* Mobile Cards View (Visible on sm/mobile screens) */}
+                                <div className="block lg:hidden space-y-3">
+                                    {products.map((product) => (
+                                        <div key={product.id} className="glass p-3.5 rounded-2xl flex items-center gap-3 border border-emerald-100 bg-white/95 shadow-sm">
+                                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                                                <img
+                                                    src={product.images?.[0] || 'https://via.placeholder.com/150'}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-sm text-gray-900 truncate">{product.name}</h4>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="font-extrabold text-sm text-emerald-800">{formatCurrency(product.price)}</span>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${product.stock > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}`}>
+                                                        {product.stock > 0 ? `${product.stock} in stock` : 'Stock Out'}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[11px] text-gray-500 block truncate">{product.category?.name || 'Plant'}</span>
+                                            </div>
+                                            <div className="flex flex-col gap-1.5 flex-shrink-0">
+                                                <button
+                                                    onClick={() => handleEditProduct(product)}
+                                                    className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors active:scale-95"
+                                                    title="Edit"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteProduct(product)}
+                                                    className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors active:scale-95"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
+
+                                {/* Desktop View Table */}
+                                <div className="hidden lg:block glass rounded-2xl overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                                                <tr>
+                                                    <th className="px-6 py-4 text-left font-semibold">Image</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Name</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Price</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Stock</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {products.map((product) => (
+                                                    <tr key={product.id} className="border-b border-gray-100 hover:bg-white/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                                                <img
+                                                                    src={product.images?.[0] || 'https://via.placeholder.com/150'}
+                                                                    alt={product.name}
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 font-medium">{product.name}</td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold">{formatCurrency(product.price)}</span>
+                                                                {product.discount > 0 && (
+                                                                    <span className="text-xs text-gray-400 line-through">
+                                                                        {formatCurrency(product.originalPrice)}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`badge ${product.stock > 0 ? 'badge-success' : 'badge-error'}`}>
+                                                                {product.stock}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => handleEditProduct(product)}
+                                                                    className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                                >
+                                                                    <Edit className="w-5 h-5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteProduct(product)}
+                                                                    className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                                                >
+                                                                    <Trash2 className="w-5 h-5" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 )}
@@ -727,39 +941,18 @@ const AdminDashboard = () => {
                                 <div className="animate-pulse text-gray-600">Loading orders...</div>
                             </div>
                         ) : (
-                            <div className="glass rounded-2xl overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left font-semibold">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
-                                                        onChange={(e) => {
-                                                            if (e.target.checked) {
-                                                                setSelectedOrders(filteredOrders.map(o => o.id));
-                                                            } else {
-                                                                setSelectedOrders([]);
-                                                            }
-                                                        }}
-                                                        className="w-4 h-4"
-                                                    />
-                                                </th>
-                                                <th className="px-6 py-4 text-left font-semibold">Order ID</th>
-                                                <th className="px-6 py-4 text-left font-semibold">User</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Total</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Payment</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Transaction ID</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Status</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Date</th>
-                                                <th className="px-6 py-4 text-left font-semibold">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredOrders.map((order) => (
-                                                <tr key={order.id} className="border-b border-gray-100 hover:bg-white/50 transition-colors">
-                                                    <td className="px-6 py-4">
+                            <>
+                                {/* Mobile Order Cards View (Optimized for Phones) */}
+                                <div className="block lg:hidden space-y-3">
+                                    {filteredOrders.length === 0 ? (
+                                        <div className="glass p-8 text-center text-gray-500 rounded-2xl">
+                                            No orders match your filter criteria.
+                                        </div>
+                                    ) : (
+                                        filteredOrders.map((order) => (
+                                            <div key={order.id} className="glass p-4 rounded-2xl border border-indigo-100 shadow-sm bg-white/95 space-y-3">
+                                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                                    <div className="flex items-center gap-2">
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedOrders.includes(order.id)}
@@ -770,81 +963,184 @@ const AdminDashboard = () => {
                                                                     setSelectedOrders(selectedOrders.filter(id => id !== order.id));
                                                                 }
                                                             }}
+                                                            className="w-4 h-4 rounded text-indigo-600"
+                                                        />
+                                                        <span className="font-mono font-bold text-xs text-indigo-900">#{order.id.slice(0, 8)}</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-gray-500 font-medium">
+                                                        {new Date(order.createdAt).toLocaleDateString('en-BD')}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-gray-900">{order.user ? order.user.name : 'Customer'}</p>
+                                                        <p className="text-xs text-gray-500 truncate max-w-[160px]">{order.user?.email || order.shippingAddress?.phone || 'Barishal'}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-base font-extrabold text-emerald-800 font-mono block">
+                                                            {formatCurrency(order.total)}
+                                                        </span>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                                                            order.transactionId ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                            {order.transactionId ? 'bKash Trx' : 'Cash on Delivery'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {order.transactionId && (
+                                                    <div className="bg-indigo-50/70 p-2 rounded-xl text-xs flex justify-between items-center border border-indigo-100">
+                                                        <span className="text-gray-600 font-medium">bKash TrxID:</span>
+                                                        <span className="font-mono font-bold text-indigo-800">{order.transactionId}</span>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between pt-2 border-t border-gray-100 gap-2">
+                                                    <div className="flex-1">
+                                                        <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Status:</label>
+                                                        <select
+                                                            value={order.status}
+                                                            onChange={(e) => dispatch(updateOrderStatus({ id: order.id, status: e.target.value }))}
+                                                            className="w-full text-xs font-bold py-1.5 px-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800"
+                                                        >
+                                                            <option value="PENDING">⏳ PENDING</option>
+                                                            <option value="PROCESSING">🔄 PROCESSING</option>
+                                                            <option value="SHIPPED">📦 SHIPPED</option>
+                                                            <option value="ON_THE_WAY">🚚 ON THE WAY</option>
+                                                            <option value="DELIVERED">✅ DELIVERED</option>
+                                                            <option value="PAID">💵 PAID</option>
+                                                            <option value="CANCELLED" disabled>❌ CANCELLED</option>
+                                                        </select>
+                                                    </div>
+                                                    {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
+                                                        <button
+                                                            onClick={() => handleCancelOrder(order.id)}
+                                                            className="px-3 py-1.5 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-xl font-bold self-end"
+                                                            title="Cancel Order"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Desktop View Table */}
+                                <div className="hidden lg:block glass rounded-2xl overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                                                <tr>
+                                                    <th className="px-6 py-4 text-left font-semibold">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedOrders(filteredOrders.map(o => o.id));
+                                                                } else {
+                                                                    setSelectedOrders([]);
+                                                                }
+                                                            }}
                                                             className="w-4 h-4"
                                                         />
-                                                    </td>
-                                                    <td className="px-6 py-4 font-medium">#{order.id.slice(0, 8)}</td>
-                                                    <td className="px-6 py-4">{order.user ? order.user.name : 'N/A'}</td>
-                                                    <td className="px-6 py-4 font-semibold text-gradient">{formatCurrency(order.total)}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.transactionId
-                                                            ? 'bg-purple-100 text-purple-700'
-                                                            : 'bg-gray-100 text-gray-700'
-                                                            }`}>
-                                                            {order.transactionId ? '💳 Online' : '💵 COD'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {order.transactionId ? (
-                                                            <span className="font-mono text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 text-indigo-700">
-                                                                {order.transactionId}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-xs text-gray-400">—</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`badge ${order.status === 'PAID' ? 'badge-success' :
-                                                            order.status === 'DELIVERED' ? 'bg-blue-100 text-blue-700' :
-                                                                'badge-warning'
-                                                            }`}>
-                                                            {order.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600">
-                                                        {new Date(order.createdAt).toLocaleDateString('en-BD')}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-wrap items-center gap-2">
-                                                            <select
-                                                                value={order.status}
-                                                                onChange={(e) => dispatch(updateOrderStatus({ id: order.id, status: e.target.value }))}
-                                                                className="text-xs p-1 rounded border border-gray-300 bg-white"
-                                                                disabled={order.status === 'CANCELLED' || order.status === 'DELIVERED'}
-                                                            >
-                                                                <option value="PENDING">Pending</option>
-                                                                <option value="PROCESSING">Processing</option>
-                                                                <option value="SHIPPED">Shipped</option>
-                                                                <option value="ON_THE_WAY">On the Way</option>
-                                                                <option value="DELIVERED">Delivered</option>
-                                                                <option value="PAID">Paid</option>
-                                                                <option value="CANCELLED" disabled>Cancelled</option>
-                                                            </select>
-
-                                                            {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        if (window.confirm(`Are you sure you want to cancel Order #${order.id.slice(0, 8)}? This will restore stock and cannot be undone.`)) {
-                                                                            dispatch(cancelOrder(order.id))
-                                                                                .unwrap()
-                                                                                .then(() => alert('Order cancelled successfully'))
-                                                                                .catch(err => alert(err));
-                                                                        }
-                                                                    }}
-                                                                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                                                                    title="Cancel Order"
-                                                                >
-                                                                    <XCircle className="w-5 h-5" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Order ID</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">User</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Total</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Payment</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Transaction ID</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Status</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Date</th>
+                                                    <th className="px-6 py-4 text-left font-semibold">Actions</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {filteredOrders.map((order) => (
+                                                    <tr key={order.id} className="border-b border-gray-100 hover:bg-white/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedOrders.includes(order.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedOrders([...selectedOrders, order.id]);
+                                                                    } else {
+                                                                        setSelectedOrders(selectedOrders.filter(id => id !== order.id));
+                                                                    }
+                                                                }}
+                                                                className="w-4 h-4"
+                                                            />
+                                                        </td>
+                                                        <td className="px-6 py-4 font-medium">#{order.id.slice(0, 8)}</td>
+                                                        <td className="px-6 py-4">{order.user ? order.user.name : 'N/A'}</td>
+                                                        <td className="px-6 py-4 font-semibold text-gradient">{formatCurrency(order.total)}</td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.transactionId
+                                                                ? 'bg-purple-100 text-purple-700'
+                                                                : 'bg-gray-100 text-gray-700'
+                                                                }`}>
+                                                                {order.transactionId ? '💳 Online' : '💵 COD'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {order.transactionId ? (
+                                                                <span className="font-mono text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 text-indigo-700">
+                                                                    {order.transactionId}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-400">—</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`badge ${order.status === 'PAID' ? 'badge-success' :
+                                                                order.status === 'DELIVERED' ? 'bg-blue-100 text-blue-700' :
+                                                                    'badge-warning'
+                                                                }`}>
+                                                                {order.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                                            {new Date(order.createdAt).toLocaleDateString('en-BD')}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <select
+                                                                    value={order.status}
+                                                                    onChange={(e) => dispatch(updateOrderStatus({ id: order.id, status: e.target.value }))}
+                                                                    className="text-xs p-1 rounded border border-gray-300 bg-white"
+                                                                    disabled={order.status === 'CANCELLED' || order.status === 'DELIVERED'}
+                                                                >
+                                                                    <option value="PENDING">Pending</option>
+                                                                    <option value="PROCESSING">Processing</option>
+                                                                    <option value="SHIPPED">Shipped</option>
+                                                                    <option value="ON_THE_WAY">On the Way</option>
+                                                                    <option value="DELIVERED">Delivered</option>
+                                                                    <option value="PAID">Paid</option>
+                                                                    <option value="CANCELLED" disabled>Cancelled</option>
+                                                                </select>
+
+                                                                {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
+                                                                    <button
+                                                                        onClick={() => handleCancelOrder(order.id)}
+                                                                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                                        title="Cancel Order"
+                                                                    >
+                                                                        <XCircle className="w-5 h-5" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
+                            </>
                         )}
                     </div>
                 )}

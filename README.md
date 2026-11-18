@@ -1,161 +1,201 @@
-# 🛍️ Nexora — AI-Powered E-commerce Platform
+# 🌿 Green Petals — Botanical Nursery & Living Plants Boutique
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![Backend](https://img.shields.io/badge/backend-Node.js%20%7C%20Express-blue.svg)]()
-[![Frontend](https://img.shields.io/badge/frontend-React%20%7C%20Vite-blueviolet.svg)]()
-[![Database](https://img.shields.io/badge/database-PostgreSQL%20%7C%20Prisma-lightblue.svg)]()
+[![Status](https://img.shields.io/badge/status-production--ready-success.svg)](https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project)
+[![Database](https://img.shields.io/badge/database-Neon%20Serverless%20Postgres-00e699.svg)](https://neon.tech)
+[![AI Engine](https://img.shields.io/badge/AI-Groq%20%7C%20GPT--OSS--20B-f55036.svg)](https://groq.com)
+[![Media Storage](https://img.shields.io/badge/media-Cloudinary%20CDN-3448c5.svg)](https://cloudinary.com)
+[![Email Service](https://img.shields.io/badge/email-Brevo%20Transactional-0b996f.svg)](https://brevo.com)
+[![Payment](https://img.shields.io/badge/payment-bKash%20%26%20COD-e2136e.svg)](https://bkash.com)
 
-**Nexora** is a cutting-edge, full-stack e-commerce solution designed with a focus on premium user experience, AI-driven automation, and robust administrative control. Built using the modern PERN stack (PostgreSQL, Express, React, Node), it features seamless integrations for AI assistance, secure payments, and dynamic content management.
-
----
-
-## ✨ Key Features
-
-### 👤 User Experience
-- **Dynamic Catalog**: Intelligent product discovery with advanced filtering, sorting, and categories.
-- **Smart Recommendations**: AI-powered product suggestions tailored to user interests.
-- **Secure Auth**: Full authentication suite including JWT-based login, registration, and OTP-based password resets.
-- **Wishlist & Cart**: Persistent shopping cart and wishlist functionality for a smooth shopping journey.
-- **Order Tracking**: Real-time status updates for placed orders with PDF invoice generation.
-- **Product Reviews**: Interactive review system with helpfulness tracking.
-
-### 🤖 AI Integration (Gemini 2.0)
-- **AI Chatbot**: Real-time support to help users find products and answers.
-- **Auto-Content**: AI-generated SEO-friendly product descriptions for administrators.
-
-### 🔐 Administrative Control
-- **Powerful Dashboard**: Comprehensive CRUD operations for Products, Categories, and Orders.
-- **Sales Analytics**: Visual representation of sales data and order trends using Recharts.
-- **Image Management**: Seamless file uploads integrated with Cloudinary.
+**Green Petals** (গ্রিন পেটালস) is an enterprise-grade, mobile-first full-stack e-commerce platform crafted exclusively for living botanical houseplants, exotic flowers, succulents, handcrafted planters, and organic plant care. Directed and founded by **Munnar Khanam** and based in **Barishal, Bangladesh**, the platform delivers healthy live plants nationwide across all 64 districts with moisture-lock protective packaging.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌸 Store & Proprietor Information
 
-| Component | Technologies |
+- **Nursery Name:** Green Petals (গ্রিন পেটালস)
+- **Founder & Proprietor:** Munnar Khanam (মুন্নার খানম)
+- **Direct Hotline & WhatsApp:** `01768686120`
+- **Official Store Email:** `munner.ent@gmail.com`
+- **Facebook Profile:** [https://www.facebook.com/munnar.khanam](https://www.facebook.com/munnar.khanam)
+- **Official bKash Payment (Send Money):** `01715020391`
+- **Home Hub & Nursery Location:** Barishal, Bangladesh
+- **Delivery Rates:**
+  - **Inside Barishal Metro:** ৳100 (24–48 Hours Express Transit)
+  - **Outside Barishal (All 64 Districts):** ৳150 (2–4 Days Moist-Locked Protective Packaging)
+
+---
+
+## ✨ Key Platform Highlights
+
+### 📱 100% Mobile-First Touch Experience
+- **Fluid Mobile Drawer:** Dedicated zero-clipping slide-over menu with touch navigation, quick search, hotline, and Facebook shortcuts.
+- **Responsive 2-Column Grid:** High-density, touch-optimized product cards on mobile that expand to 3–4 columns on tablets and wide screens.
+- **Real-Time Shuffle (🔀):** Real-time randomized plant discovery so visitors always see fresh botanical varieties.
+- **Interactive Quick-Pill Category Scroller:** Horizontal swiping across Indoor Plants, Flowering Blooms, Air Purifiers, Succulents, Ceramic Pots, and Organic Care.
+- **Button Loading & Visual Feedback:** Instant spinner and floating toast popups on Add to Cart, Wishlist, and Checkout.
+
+### 💳 Seamless bKash Mobile Payment & Cash on Delivery
+- **One-Tap Number Copy:** Copies `01715020391` to clipboard with animated confirmation and toast.
+- **Step-by-step Visual Tutorial:** Easy Bangla + English 5-step instructions for dialling `*247#` or using the bKash App.
+- **Transaction ID (TrxID) Verification:** Strict validation before order finalization.
+- **Celebration Checkout:** High-velocity multi-color confetti cannon (`canvas-confetti`) and emerald glass receipt modal (`SweetAlert2`).
+- **Immediate Invoice Access:** Direct redirection to `/order/:id` with real-time status tracking bar.
+
+### 🤖 Live Database-Connected Botanical AI Assistant (Groq)
+- **Real-Time Inventory Awareness:** Connected directly to Neon PostgreSQL. The AI knows all 22+ live plants, prices, stock levels, categories, and care tips.
+- **Multi-Lingual:** Fluent in English, Bengali (বাংলা), and Banglish.
+- **Store Guidance:** Answers inquiries about plant care, sunlight, watering schedules, delivery rates, bKash numbers, and proprietor Munnar Khanam's contact info.
+- **Admin Copywriting:** Generates SEO-optimized poetic product descriptions with 1 click.
+
+### 📄 Pristine PDF Invoices & Automated Emails
+- **Zero Character Corruption:** Custom PDFKit rendering using universal Bangladeshi financial formatting (`Tk. 1,450.00`) and clean WinAnsi typography without corrupted characters (`Ÿ3cSã`).
+- **Automated Brevo Dispatch:** Clean HTML confirmation email with attached PDF invoice sent to the customer's inbox (`user.email`) and instant new order alert dispatched to the store owner (`munner.ent@gmail.com`).
+- **1-Click Download:** Customer can download their PDF invoice anytime from `/order/:id`.
+
+### 🛡️ Unified Single `.env` Architecture
+- **Single Root Configuration:** Zero duplicate `.env` files. Both the Node backend and Vite frontend read seamlessly from the root `/.env`, simplifying cloud deployment on **Render**, **Railway**, or **VPS**.
+
+---
+
+## 🔐 Administrative Access
+
+Admin panels and inventory management can be accessed at `/login` or `/admin`:
+
+| User Role | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- |
+| **Store Owner** | `munner.ent@gmail.com` | `munnar12345` | Full Catalog, Orders, User Analytics, Image Studio |
+| **Super Admin** | `noor@admin.com` | `noorabdullah` | Technical System Administration & DB Controls |
+
+---
+
+## 🛠️ Complete Tech Stack
+
+| Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React 19, Vite, Redux Toolkit, Tailwind CSS, Lucide Icons |
-| **Backend** | Node.js, Express, Prisma ORM, JWT, Winston Logging |
-| **Database** | PostgreSQL |
-| **Integrations** | Google Gemini AI, Cloudinary (Media), Brevo (Email), PDFKit (Invoices) |
+| **Frontend** | React 19, Vite, Redux Toolkit, Tailwind CSS, SweetAlert2, Canvas-Confetti, Lucide Icons |
+| **Backend** | Node.js, Express, Prisma ORM, JWT, Bcrypt, Winston Logger |
+| **Cloud Database** | **Neon** Serverless Cloud PostgreSQL (`ap-southeast-1.aws`) |
+| **AI Engine** | **Groq API** (`openai/gpt-oss-20b`) |
+| **Media & Images** | **Cloudinary CDN** (Folder: `green_petals/products`) |
+| **Transactional Email**| **Brevo API** (Verified Sender: `sheikhnoorabdullah04@gmail.com`) |
+| **PDF Generation** | **PDFKit** (Official Botanical Invoices in `Tk.`) |
 
 ---
 
-## 🧭 Repository Structure
+## 📁 Repository Structure
 
-```cmd
-.
-├── client/                 # Frontend React application (Vite)
+```
+Full-stack-E-Commerce-Project/
+├── .env                          # Single Unified Environment Config (Render Ready)
+├── .env.example                  # Environment Template
+├── client/                       # React 19 + Vite Frontend
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page-level components
-│   │   ├── store/          # Redux Toolkit state management
-│   │   └── utils/          # Frontend utility functions
-│   └── public/             # Static assets
-├── server/                 # Backend Node/Express application
-│   ├── controllers/        # Request handling logic
-│   ├── services/           # Business logic (AI, Email, PDF)
-│   ├── routes/             # API endpoint definitions
-│   ├── prisma/             # Database schema and seed files
-│   └── middleware/         # Auth and error-handling middleware
+│   │   ├── components/           # Navbar, Footer, ChatBot, SearchBar, Toast
+│   │   ├── pages/                # Home, Products, ProductDetails, Checkout, OrderTracking, Admin
+│   │   ├── redux/slices/         # authSlice, cartSlice, orderSlice, productSlice, toastSlice
+│   │   ├── utils/                # alerts.js (SweetAlert2 & Confetti), currency.js (Tk.)
+│   │   ├── App.jsx               # Route definitions
+│   │   └── main.jsx              # React Entrypoint
+│   └── vite.config.js            # Configured to load root .env
+├── server/                       # Express + Prisma Backend
+│   ├── config/                   # cloudinary.js, etc.
+│   ├── controllers/              # orderController, productController, aiController, authController
+│   ├── prisma/                   # schema.prisma, seedAdmin.js, seedPlants.js
+│   ├── routes/                   # API routes (/api/orders, /api/products, /api/ai, /api/auth)
+│   ├── services/                 # aiService.js (Groq + Neon), emailService.js (Brevo), pdfService.js
+│   └── server.js                 # Serves API + production client/dist bundle
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Local Quickstart Guide
 
-### Prerequisites
-- **Node.js**: v18 or higher.
-- **PostgreSQL**: A local instance or a cloud provider (e.g., Supabase).
-- **External Accounts**: Cloudinary (Image storage), Brevo (Emailing), and Google AI Studio (Gemini API).
+### 1. Prerequisites
+- **Node.js:** v18.0.0 or higher
+- **Package Manager:** npm v9+
 
-### 1. Clone & Install
+### 2. Clone & Install
 ```bash
 git clone https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git
 cd Full-stack-E-Commerce-Project
+
+# Install backend dependencies
+cd server && npm install && cd ..
+
+# Install frontend dependencies
+cd client && npm install && cd ..
 ```
 
-### 2. Backend Setup
+### 3. Setup Single Root Environment
+The project uses a single `.env` at the root directory:
+```bash
+cp .env.example .env
+```
+Ensure your database, Groq, Cloudinary, and Brevo credentials are in `.env`.
+
+### 4. Database Setup & Seeding
+Push the Prisma schema to Neon PostgreSQL and seed initial admins and botanical plants:
 ```bash
 cd server
-npm install
-```
-Create a `.env` file in `server/` with the following:
-```env
-PORT=4000
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
-JWT_SECRET=your_jwt_secret
-FRONTEND_URL=http://localhost:5173
-
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-
-BREVO_API_KEY=...
-BREVO_SENDER_EMAIL=...
-BREVO_SENDER_NAME="Nexora Support"
-
-GEMINI_API_KEY=...
-```
-Initialize the database:
-```bash
-npm run prisma:generate
-npm run prisma:push
-# Optional: Seed the database
-node prisma/seed.js
-```
-Start the server:
-```bash
-npm run dev
+npx prisma db push
+node prisma/seedAdmin.js
+node prisma/seedPlants.js
+cd ..
 ```
 
-### 3. Frontend Setup
+### 5. Run Development Servers
 ```bash
-cd ../client
-npm install
+# Terminal 1: Start Backend (Port 4000)
+cd server && npm run dev
+
+# Terminal 2: Start Frontend (Port 5173)
+cd client && npm run dev
 ```
-Create a `.env` file in `client/` with:
-```env
-VITE_BACKEND_URL=http://localhost:4000
-```
-Start the application:
-```bash
-npm run dev
-```
+
+Visit `http://localhost:5173` in your browser.
 
 ---
 
-## 🧪 Development Scripts
+## ☁️ Deployment Guide (Render)
 
-| Command | Action |
-| :--- | :--- |
-| `npm run dev` | Starts development server (Client or Server) |
-| `npm run build` | Generates optimized production build (Client) |
-| `npm start` | Starts production server (Server) |
-| `npm run lint` | Runs ESLint for code quality checks |
+This repository is pre-configured for a **unified single-service deployment** on Render:
 
----
-
-## 🛡️ Security & Performance
-- **Data Protection**: Input validation and secure headers (Helmet).
-- **Logging**: Production-grade logging with Winston.
-- **Responsiveness**: Mobile-first design using Tailwind CSS utility classes.
-- **Auth**: Secure password hashing with Bcrypt and stateless JWT authentication.
-
-## 🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. **Create Web Service** on Render connected to this repository.
+2. **Build Command:**
+   ```bash
+   cd client && npm install && npm run build && cd ../server && npm install && npx prisma db push
+   ```
+3. **Start Command:**
+   ```bash
+   node server/server.js
+   ```
+4. **Environment Variables:**
+   Copy the contents of the root [`.env`](.env) into Render's Environment Variables panel.
+   In production, `server/server.js` automatically serves the compiled `client/dist` static assets and handles all API routes under `/api/*`.
 
 ---
 
-## 📜 License
-Internal use only. Please contact the repository owner for licensing details.
+## 🌿 Botanical Catalog Categories
+
+1. **Indoor Plants:** Monstera Deliciosa, Snake Plant, Peace Lily, Fiddle Leaf Fig, ZZ Plant, Golden Pothos
+2. **Flowering Plants:** Arabian Jasmine (Beli), Royal Adenium Desert Rose, Gardenia, Bougainvillea, Phalaenopsis Orchid
+3. **Air Purifying Plants:** Areca Palm, Boston Fern, Spider Plant, Aglaonema Silver Bay
+4. **Succulents & Cacti:** Aloe Vera Barbadensis, Echeveria Elegans, Haworthia Zebra, Jade Plant
+5. **Pots & Planters:** Handcrafted Terracotta Pots, Modern Ceramic Glazed Planters
+6. **Organic Plant Care:** Premium Vermicompost Bio-Fertilizer, Pure Cold-Pressed Neem Oil Spray
 
 ---
-*Made with ❤️ for high-performance e-commerce.*
+
+## 📞 Support & Inquiries
+
+For botanical inquiries, bulk orders, or technical support:
+- **Proprietor:** Munnar Khanam
+- **Hotline:** `01768686120`
+- **Email:** `munner.ent@gmail.com`
+- **Facebook:** [https://www.facebook.com/munnar.khanam](https://www.facebook.com/munnar.khanam)
+
+---
+
+&copy; 2026 **Green Petals**. All rights reserved. Cultivating nature's peace across Bangladesh. 🌱

@@ -1,21 +1,21 @@
 {
-  "name": "google_e-commerce",
+  "name": "green-petals",
   "version": "1.0.0",
-  "description": "[![Status](https://img.shields.io/badge/status-active-success.svg)]() [![Backend](https://img.shields.io/badge/backend-Node.js%20%7C%20Express-blue.svg)]() [![Frontend](https://img.shields.io/badge/frontend-React%20%7C%20Vite-blueviolet.svg)]() [![Database](https://img.shields.io/badge/database-PostgreSQL%20%7C%20Prisma-lightblue.svg)]()",
-  "main": "index.js",
+  "description": "Green Petals — Premium Botanical & Live Plants E-Commerce Platform",
+  "main": "server/server.js",
   "scripts": {
+    "start": "node server/server.js",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm install --prefix server && npm install --prefix client && npx --prefix server prisma generate && npx --prefix server prisma db push && npm run build --prefix client",
+    "seed": "node server/prisma/seedPlants.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project/issues"
-  },
-  "homepage": "https://github.com/NoorAbdullah02/Full-stack-E-Commerce-Project#readme"
+  "keywords": ["plants", "ecommerce", "botanical", "react", "express", "postgresql", "prisma"],
+  "author": "Noor Abdullah (for Munnar Khanam)",
+  "license": "ISC"
 }

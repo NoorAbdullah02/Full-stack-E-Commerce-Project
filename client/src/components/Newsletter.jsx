@@ -23,13 +23,13 @@ const Newsletter = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="glass rounded-3xl p-8 md:p-12 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-12 opacity-10">
-                        <Mail className="w-64 h-64 text-indigo-600" />
+                        <Mail className="w-64 h-64 text-emerald-600" />
                     </div>
 
                     <div className="relative z-10 md:w-1/2">
-                        <h2 className="text-3xl font-bold mb-4">Subscribe to our Newsletter</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-gray-900">Join the Green Petals Plant Club</h2>
                         <p className="text-gray-600 mb-8 text-lg">
-                            Get the latest updates, new arrivals, and exclusive offers sent directly to your inbox.
+                            Get weekly plant care tips, sunlight advice, exotic bloom alerts, and exclusive subscriber discounts directly to your inbox.
                         </p>
 
                         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">

@@ -31,9 +31,12 @@ import NotFound from './pages/NotFound';
 // const Cart = () => <div className="p-10">Cart</div>;
 // const AdminDashboard = () => <div className="p-10">Admin Dashboard</div>;
 
+import ScrollToTop from './components/ScrollToTop';
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <main className="min-h-screen bg-background text-foreground relative">
         <Navbar />
         {/* Header/Navbar would go here */}

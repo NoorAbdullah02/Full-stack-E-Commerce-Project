@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Shield, ArrowLeft, CheckCircle } from 'lucide-react';
+import { showToast } from '../utils/alerts';
 
 const VerifyOTP = () => {
     const [otp, setOtp] = useState('');
@@ -39,7 +40,7 @@ const VerifyOTP = () => {
 
         try {
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/forgot-password`, { email });
-            alert('New OTP sent to your email');
+            showToast({ icon: 'success', title: 'New OTP sent to your email' });
         } catch (err) {
             setError('Failed to resend OTP');
         } finally {

@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: green-petals
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STORE_NAME
+        value: Green Petals
+      - key: OWNER_NAME
+        value: Munnar Khanam
+      - key: OWNER_PHONE
+        value: 01768686120
+      - key: OWNER_EMAIL
+        value: munner.ent@gmail.com
+      - key: CLOUDINARY_CLOUD_NAME
+        value: uo1wcorp
+      - key: CLOUDINARY_API_KEY
+        value: 456594517557442
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: green_petals
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        value: sheikhnoorabdullah04@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: Green Petals
+      - key: FRONTEND_URL
+        value: https://green-petals.onrender.com

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { showSuccess } from '../utils/alerts';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
@@ -41,7 +42,7 @@ const ResetPassword = () => {
                 newPassword
             });
 
-            alert('Password reset successfully! Please login with your new password.');
+            await showSuccess('Password Reset Done', 'Your password has been reset successfully! Please login with your new password.');
             navigate('/login');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to reset password');

@@ -13,7 +13,7 @@ const initialState = {
     pages: 1
 };
 
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL || '';
 
 export const createReview = createAsyncThunk(
     'reviews/create',

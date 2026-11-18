@@ -5,31 +5,48 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const { PrismaClient } = require('@prisma/client');
 const path = require('path');
+const fs = require('fs');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (reads root unified .env or fallback)
+const rootEnvPath = path.resolve(__dirname, '../.env');
+if (fs.existsSync(rootEnvPath)) {
+    dotenv.config({ path: rootEnvPath });
+} else {
+    dotenv.config();
+}
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(helmet());
+// Security & Helmet (allow botanical external images & font assets)
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:4000',
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: [process.env.FRONTEND_URL || 'https://e-commerce-project-pern.vercel.app', 'http://localhost:5173'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(null, true);
+    },
     credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Static files for uploads (if local)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Basic Route
-app.get('/', (req, res) => {
-    res.send('AI E-commerce API is running');
-});
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -48,6 +65,27 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 
+// Serve Frontend (Client Build) when available - Allows single-service Render deployment
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+    app.use(express.static(clientDistPath));
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(clientDistPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.json({
+            status: 'online',
+            store: 'Green Petals',
+            owner: 'Munnar Khanam',
+            message: 'Green Petals API is running smoothly'
+        });
+    });
+}
+
 // Error Handling Middleware
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
@@ -56,7 +94,7 @@ app.use(errorHandler);
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🌿 Green Petals Server running on port ${PORT}`);
 });
 
 // Graceful Custom Shutdown

@@ -3,11 +3,44 @@ const prisma = new PrismaClient();
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 
-// Helper to upload to Cloudinary from buffer
-const uploadToCloudinary = (buffer) => {
+// Helper to upload to Cloudinary from buffer with organized folder structure and smart dimension fitting
+const uploadToCloudinary = (buffer, subfolder = 'products', options = {}) => {
     return new Promise((resolve, reject) => {
+        const baseFolder = process.env.CLOUDINARY_FOLDER || 'green_petals';
+        const targetFolder = `${baseFolder}/${subfolder}`;
+
+        let width = 800;
+        let height = 800;
+        if (options.aspectRatio === '4:5') {
+            width = 800;
+            height = 1000;
+        } else if (options.aspectRatio === '16:9') {
+            width = 1200;
+            height = 675;
+        } else if (options.aspectRatio === '3:4') {
+            width = 750;
+            height = 1000;
+        }
+
+        const cropType = options.fitMode === 'pad' ? 'pad' : 'fill';
+        const transformation = [
+            {
+                width,
+                height,
+                crop: cropType,
+                gravity: cropType === 'fill' ? 'auto' : undefined,
+                background: cropType === 'pad' ? 'white' : undefined,
+                quality: 'auto:good',
+                fetch_format: 'auto'
+            }
+        ];
+
         const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'ecommerce_products' },
+            {
+                folder: targetFolder,
+                resource_type: 'image',
+                transformation
+            },
             (error, result) => {
                 if (error) return reject(error);
                 resolve(result);
@@ -33,6 +66,7 @@ const getProducts = async (req, res) => {
             where.OR = [
                 { name: { contains: keyword, mode: 'insensitive' } },
                 { description: { contains: keyword, mode: 'insensitive' } },
+                { category: { name: { contains: keyword, mode: 'insensitive' } } },
             ];
         }
 
@@ -55,7 +89,7 @@ const getProducts = async (req, res) => {
         else if (sort === 'newest') orderBy = { createdAt: 'desc' };
         else if (sort === 'name_asc') orderBy = { name: 'asc' };
 
-        const pageSize = 12;
+        const pageSize = 8; // 8 items per page for clean balanced mobile & desktop grid
         const page = Number(pageNumber) || 1;
 
         const count = await prisma.product.count({ where: { ...where, isDeleted: false } });
@@ -123,13 +157,20 @@ const createProduct = async (req, res) => {
     try {
         const { name, price, description, categoryId, stock } = req.body;
 
+        const uploadOptions = {
+            aspectRatio: req.body.aspectRatio || '1:1',
+            fitMode: req.body.fitMode || 'fill'
+        };
+
         // Handle image upload
         let imageUrls = [];
-        if (req.files) {
+        if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const result = await uploadToCloudinary(file.buffer);
+                const result = await uploadToCloudinary(file.buffer, 'products', uploadOptions);
                 imageUrls.push(result.secure_url);
             }
+        } else if (req.body.imageUrl) {
+            imageUrls.push(req.body.imageUrl);
         }
 
         const product = await prisma.product.create({
@@ -165,13 +206,19 @@ const updateProduct = async (req, res) => {
         // 2. If no new files -> Keep existing?
 
         let imageUrls = undefined; // undefined means "do not update" in Prisma
+        const uploadOptions = {
+            aspectRatio: req.body.aspectRatio || '1:1',
+            fitMode: req.body.fitMode || 'fill'
+        };
 
         if (req.files && req.files.length > 0) {
             imageUrls = [];
             for (const file of req.files) {
-                const result = await uploadToCloudinary(file.buffer);
+                const result = await uploadToCloudinary(file.buffer, 'products', uploadOptions);
                 imageUrls.push(result.secure_url);
             }
+        } else if (req.body.imageUrl) {
+            imageUrls = [req.body.imageUrl];
         }
 
         // Construct update data

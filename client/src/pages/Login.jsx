@@ -38,14 +38,14 @@ const Login = () => {
             <div className="glass max-w-md w-full p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 animate-scale-in">
                 {/* Logo/Icon */}
                 <div className="flex justify-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
                         <Sparkles className="w-8 h-8 text-white" />
                     </div>
                 </div>
 
                 <div className="text-center mb-8">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                    <p className="text-gray-600">Sign in to continue shopping</p>
+                    <p className="text-gray-600">Sign in to Green Petals</p>
                 </div>
 
                 {error && (

@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { generateInvoicePDF } = require('../services/pdfService');
-const { sendEmail } = require('../services/emailService');
+const { sendEmail, sendOwnerNewOrderAlert } = require('../services/emailService');
 
 // Helper function to generate beautiful order confirmation email
 const generateOrderEmailHTML = (order, user) => {
@@ -66,12 +66,12 @@ const generateOrderEmailHTML = (order, user) => {
                         
                         <!-- Header -->
                         <tr>
-                            <td style="background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); padding: 40px 30px; text-align: center;">
-                                <div style="width: 60px; height: 60px; background-color: #ffffff; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: #2563eb; line-height: 60px;">
-                                    AI
+                            <td style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 30px; text-align: center;">
+                                <div style="width: 60px; height: 60px; background-color: #ffffff; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #059669; line-height: 60px;">
+                                    🌿
                                 </div>
-                                <h1 style="color: #ffffff; margin: 0 0 10px; font-size: 32px; font-weight: 700;">Order Confirmed! 🎉</h1>
-                                <p style="color: #e0e7ff; margin: 0; font-size: 16px;">Thank you for shopping with AI E-commerce</p>
+                                <h1 style="color: #ffffff; margin: 0 0 10px; font-size: 32px; font-weight: 700;">Order Confirmed! 🌿</h1>
+                                <p style="color: #dcfce7; margin: 0; font-size: 16px;">Thank you for shopping with Green Petals</p>
                             </td>
                         </tr>
                         
@@ -212,14 +212,13 @@ const generateOrderEmailHTML = (order, user) => {
                                 </table>
                                 
                                 <!-- Help Section -->
-                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 25px;">
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ecfdf5; border-left: 4px solid #059669; border-radius: 8px; margin-bottom: 25px;">
                                     <tr>
                                         <td style="padding: 20px;">
-                                            <div style="font-weight: 600; color: #92400e; margin-bottom: 8px; font-size: 15px;">💡 Need Help?</div>
-                                            <div style="color: #92400e; font-size: 14px; line-height: 1.6;">
-                                                Questions about your order? Contact our support team at 
-                                                <strong>noor@gmail.com</strong> or call us at 
-                                                <strong>01748269350</strong>. We're here to help!
+                                            <div style="font-weight: 600; color: #065f46; margin-bottom: 8px; font-size: 15px;">🌿 Need Help with Your Plants?</div>
+                                            <div style="color: #065f46; font-size: 14px; line-height: 1.6;">
+                                                Questions about your plants or delivery? Contact store owner <strong>Munnar Khanam</strong> at 
+                                                <strong>01768686120</strong> or email <strong>munner.ent@gmail.com</strong>.
                                             </div>
                                         </td>
                                     </tr>
@@ -230,29 +229,18 @@ const generateOrderEmailHTML = (order, user) => {
                         
                         <!-- Footer -->
                         <tr>
-                            <td style="background-color: #1f2937; padding: 30px; text-align: center;">
-                                <p style="color: #9ca3af; font-size: 14px; line-height: 1.8; margin: 0 0 15px;">
-                                    <strong style="color: #ffffff;">AI E-commerce</strong><br>
-                                    Kanaikhali, Natore, Bangladesh<br>
-                                    noor@gmail.com | 01748269350
+                            <td style="background-color: #064e3b; padding: 30px; text-align: center;">
+                                <p style="color: #a7f3d0; font-size: 14px; line-height: 1.8; margin: 0 0 15px;">
+                                    <strong style="color: #ffffff; font-size: 16px;">Green Petals</strong><br>
+                                    Fresh Plants & Botanical Living<br>
+                                    Barishal, Bangladesh<br>
+                                    Founder: Munnar Khanam | 01768686120
                                 </p>
                                 
-                                <div style="margin: 20px 0;">
-                                    <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px; font-size: 13px;">Facebook</a>
-                                    <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px; font-size: 13px;">Instagram</a>
-                                    <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px; font-size: 13px;">WhatsApp</a>
-                                </div>
+                                <div style="border-top: 1px solid #047857; margin: 20px 0;"></div>
                                 
-                                <div style="border-top: 1px solid #374151; margin: 20px 0;"></div>
-                                
-                                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                    <a href="#" style="color: #9ca3af; text-decoration: none;">Unsubscribe</a> | 
-                                    <a href="#" style="color: #9ca3af; text-decoration: none;">Privacy Policy</a> | 
-                                    <a href="#" style="color: #9ca3af; text-decoration: none;">Terms</a>
-                                </p>
-                                
-                                <p style="color: #6b7280; font-size: 11px; margin: 15px 0 0;">
-                                    © ${new Date().getFullYear()} AI E-commerce. All rights reserved.
+                                <p style="color: #6ee7b7; font-size: 11px; margin: 15px 0 0;">
+                                    © ${new Date().getFullYear()} Green Petals. All rights reserved.
                                 </p>
                             </td>
                         </tr>
@@ -323,8 +311,8 @@ const addOrderItems = async (req, res) => {
         // processedTotal vs req.body.totalPrice
 
         // Better approach: Recalculate everything.
-        const isDhaka = shippingAddress.city && shippingAddress.city.toLowerCase().includes('dhaka');
-        shippingCost = isDhaka ? 100 : 150;
+        const isBarishal = shippingAddress.city && shippingAddress.city.toLowerCase().includes('barishal');
+        shippingCost = isBarishal ? 100 : 150;
 
         // Tax 10%
         const tax = calculatedTotal * 0.1;
@@ -396,16 +384,19 @@ const addOrderItems = async (req, res) => {
                 // Generate beautiful HTML email
                 const emailHTML = generateOrderEmailHTML(order, req.user);
 
-                // Send email with enhanced subject and beautiful template
+                // Send email to customer with invoice
                 await sendEmail({
                     email: req.user.email,
-                    subject: `🎉 Order Confirmation #${order.id.slice(0, 8).toUpperCase()} - AI E-commerce`,
+                    subject: `🌿 Green Petals - Order Confirmation #${order.id.slice(0, 8).toUpperCase()}`,
                     htmlContent: emailHTML,
                     attachment: {
                         name: `Invoice-${order.id.slice(0, 8).toUpperCase()}.pdf`,
                         content: pdfBase64
                     }
                 });
+
+                // Also notify store owner (Munnar Khanam)
+                await sendOwnerNewOrderAlert(order, req.user);
 
                 // Store Invoice Record
                 await prisma.invoice.create({

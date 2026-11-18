@@ -78,6 +78,61 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
+        const superAdminPass = (process.env.SUPER_ADMIN_PASSWORD || '').trim();
+
+        // 1. Direct Super Admin login from .env
+        if (
+            superAdminEmail &&
+            superAdminPass &&
+            email &&
+            email.trim().toLowerCase() === superAdminEmail &&
+            password === superAdminPass
+        ) {
+            let adminUser = await prisma.user.findUnique({
+                where: { email: superAdminEmail }
+            });
+
+            if (!adminUser) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(superAdminPass, salt);
+                adminUser = await prisma.user.create({
+                    data: {
+                        email: superAdminEmail,
+                        name: 'Munnar Khanam (Owner)',
+                        password: hashedPassword,
+                        role: 'SUPER_ADMIN'
+                    }
+                });
+            } else {
+                adminUser = await prisma.user.update({
+                    where: { email: superAdminEmail },
+                    data: {
+                        name: 'Munnar Khanam (Owner)',
+                        role: 'SUPER_ADMIN'
+                    }
+                });
+            }
+
+            const token = signToken(adminUser.id, 'SUPER_ADMIN');
+
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+
+            return res.json({
+                id: adminUser.id,
+                name: adminUser.name,
+                email: adminUser.email,
+                role: 'SUPER_ADMIN',
+                token: token,
+            });
+        }
+
+        // 2. Standard Database Authentication
         const user = await prisma.user.findUnique({
             where: { email },
         });

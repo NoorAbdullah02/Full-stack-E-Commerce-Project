@@ -1,12 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL || '';
+
+const getInitialCartItems = () => {
+    try {
+        const stored = localStorage.getItem('cartItems');
+        if (!stored) return [];
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter((item) => item && item.productId)
+            .map((item) => ({
+                ...item,
+                name: item.name || 'Plant Item',
+                price: Number(item.price) || 0,
+                qty: Number(item.qty || item.quantity) || 1,
+                image: item.image || item.images?.[0] || 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400'
+            }));
+    } catch {
+        return [];
+    }
+};
 
 const initialState = {
-    cartItems: localStorage.getItem('cartItems')
-        ? JSON.parse(localStorage.getItem('cartItems'))
-        : [],
+    cartItems: getInitialCartItems(),
     loading: false,
     error: null,
 };

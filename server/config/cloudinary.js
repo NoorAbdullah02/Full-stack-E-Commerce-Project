@@ -1,7 +1,14 @@
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
+const path = require('path');
+const fs = require('fs');
 
-dotenv.config();
+const rootEnvPath = path.resolve(__dirname, '../../.env');
+if (fs.existsSync(rootEnvPath)) {
+    dotenv.config({ path: rootEnvPath });
+} else {
+    dotenv.config();
+}
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -2,12 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { MessageCircle, X, Send, Sparkles, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Bot, User, Sprout } from 'lucide-react';
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'model', content: 'Hi! 👋 How can I help you today? I can assist you with product recommendations, answer questions, and help you find exactly what you\'re looking for!' }
+        { role: 'model', content: 'Hello plant lover! 🌿 I am your Green Petals Assistant. Ask me about our live botanical collection, plant care, prices, bKash payment, or delivery across Bangladesh!' }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -22,8 +22,8 @@ const ChatBot = () => {
     }, [messages, isOpen]);
 
     const sendMessage = async (e) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+        if (e && e.preventDefault) e.preventDefault();
+        if (!input.trim() || loading) return;
 
         const userMessage = { role: 'user', content: input };
         setMessages((prev) => [...prev, userMessage]);
@@ -43,7 +43,7 @@ const ChatBot = () => {
         } catch (error) {
             setMessages((prev) => [...prev, {
                 role: 'model',
-                content: 'Sorry, I\'m having trouble connecting right now. Please try again later! 😔'
+                content: 'Welcome to Green Petals! 🌿 For immediate assistance, feel free to call store proprietor Munnar Khanam at 01768686120 or message on Facebook: fb.com/munnar.khanam.'
             }]);
         } finally {
             setLoading(false);
@@ -51,110 +51,106 @@ const ChatBot = () => {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-[100]">
             {!isOpen && (
                 <button
                     onClick={toggleChat}
                     className="group relative"
+                    aria-label="Open Green Petals AI Assistant"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse-slow"></div>
-                    <div className="relative w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center group-hover:scale-110 transition-all duration-300 cursor-pointer">
-                        <MessageCircle className="w-8 h-8 text-white" />
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full blur-md opacity-60 group-hover:opacity-90 transition-opacity duration-300 animate-pulse-slow"></div>
+                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full shadow-xl shadow-emerald-500/40 flex items-center justify-center group-hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer border-2 border-white">
+                        <MessageCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse"></div>
                     </div>
                 </button>
             )}
 
             {isOpen && (
-                <div className="glass rounded-3xl shadow-2xl w-96 flex flex-col h-[600px] overflow-hidden animate-scale-in border border-white/20">
+                <div className="bg-white rounded-3xl shadow-2xl w-[92vw] sm:w-96 max-w-sm flex flex-col h-[520px] sm:h-[580px] overflow-hidden animate-scale-in border border-emerald-100">
                     {/* Header */}
-                    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6">
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
+                    <div className="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 p-4 sm:p-5 text-white flex-shrink-0">
                         <div className="relative flex justify-between items-center">
                             <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                    <Sparkles className="w-6 h-6 text-white" />
+                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                    <Sprout className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-white text-lg">AI Assistant</h3>
-                                    <p className="text-white/80 text-xs">Always here to help</p>
+                                    <h3 className="font-bold text-white text-base">Green Petals AI</h3>
+                                    <p className="text-emerald-100 text-[11px]">Plant Care & Live Store Assistant</p>
                                 </div>
                             </div>
                             <button
                                 onClick={toggleChat}
-                                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200"
+                                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200"
+                                aria-label="Close Chat"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Messages */}
-                    <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-gray-50 to-white">
+                    {/* Messages Body */}
+                    <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-gradient-to-b from-emerald-50/20 to-white text-xs sm:text-sm">
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
-                                className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-in`}
+                                className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'} animate-fade-in`}
                             >
-                                {/* Avatar */}
-                                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === 'user'
-                                        ? 'bg-gradient-to-br from-indigo-600 to-purple-600'
-                                        : 'bg-gradient-to-br from-pink-500 to-amber-400'
-                                    }`}>
-                                    {msg.role === 'user' ? (
-                                        <User className="w-4 h-4 text-white" />
-                                    ) : (
-                                        <Bot className="w-4 h-4 text-white" />
-                                    )}
+                                <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                                    msg.role === 'user'
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'bg-emerald-100 text-emerald-800'
+                                }`}>
+                                    {msg.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
                                 </div>
-
-                                {/* Message Bubble */}
                                 <div
-                                    className={`max-w-[75%] rounded-2xl px-4 py-3 ${msg.role === 'user'
-                                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                                            : 'glass border border-white/20 text-gray-800 shadow-sm'
-                                        }`}
+                                    className={`p-3 rounded-2xl max-w-[82%] leading-relaxed ${
+                                        msg.role === 'user'
+                                            ? 'bg-emerald-600 text-white rounded-br-none shadow-sm'
+                                            : 'bg-white text-gray-800 rounded-bl-none shadow-sm border border-emerald-100 whitespace-pre-wrap'
+                                    }`}
                                 >
-                                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                    {msg.content}
                                 </div>
                             </div>
                         ))}
-
                         {loading && (
-                            <div className="flex gap-3 animate-fade-in">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-amber-400 flex items-center justify-center">
-                                    <Bot className="w-4 h-4 text-white" />
+                            <div className="flex gap-2.5 items-center text-gray-500 animate-pulse">
+                                <div className="w-7 h-7 bg-emerald-100 rounded-full flex items-center justify-center">
+                                    <Bot className="w-3.5 h-3.5 text-emerald-700" />
                                 </div>
-                                <div className="glass border border-white/20 rounded-2xl px-4 py-3 shadow-sm">
-                                    <div className="flex space-x-2">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
-                                    </div>
+                                <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-emerald-100 shadow-sm text-xs text-emerald-800 flex items-center gap-1.5">
+                                    <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce"></div>
+                                    <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce delay-100"></div>
+                                    <div className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce delay-200"></div>
+                                    <span className="ml-1 text-[11px]">Consulting botanical catalog...</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Input */}
-                    <form onSubmit={sendMessage} className="p-4 glass border-t border-white/20">
+                    {/* Chat Input */}
+                    <form onSubmit={sendMessage} className="p-3 bg-white border-t border-emerald-100 flex-shrink-0">
                         <div className="flex gap-2">
-                            <Input
+                            <input
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Type your message..."
+                                placeholder="Ask about plants, prices, or care..."
                                 disabled={loading}
-                                className="flex-1 glass border-white/20 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl"
+                                className="flex-1 input-glass py-2 px-3.5 text-xs sm:text-sm rounded-xl border-emerald-200 focus:border-emerald-500"
                             />
                             <button
                                 type="submit"
                                 disabled={loading || !input.trim()}
-                                className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300 hover:scale-105"
+                                className="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 rounded-xl flex items-center justify-center shadow-md transition-all active:scale-95 flex-shrink-0"
                             >
-                                <Send className="h-5 w-5 text-white" />
+                                <Send className="h-4 w-4" />
                             </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2 text-center">Powered by Google Gemini AI</p>
+                        <p className="text-[10px] text-gray-400 mt-1.5 text-center">
+                            Powered by <strong className="text-emerald-700 font-semibold">Green Petals Botanical AI</strong>
+                        </p>
                     </form>
                 </div>
             )}

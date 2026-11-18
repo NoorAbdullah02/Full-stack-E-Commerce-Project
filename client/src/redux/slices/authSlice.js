@@ -8,6 +8,10 @@ const getUserInfoFromStorage = () => {
             const parsedUser = JSON.parse(storedUserInfo);
             // Check if token exists, strictly require it for new auth flow
             if (parsedUser && parsedUser.token) {
+                if (parsedUser.email === 'munner.ent@gmail.com') {
+                    parsedUser.name = 'Munnar Khanam (Owner)';
+                    localStorage.setItem('userInfo', JSON.stringify(parsedUser));
+                }
                 return parsedUser;
             }
         } catch (err) {
@@ -24,7 +28,7 @@ const initialState = {
     users: [],
 };
 
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL || '';
 
 export const login = createAsyncThunk(
     'auth/login',
@@ -117,6 +121,9 @@ const authSlice = createSlice({
         });
         builder.addCase(login.fulfilled, (state, action) => {
             state.loading = false;
+            if (action.payload && action.payload.email === 'munner.ent@gmail.com') {
+                action.payload.name = 'Munnar Khanam (Owner)';
+            }
             state.userInfo = action.payload;
             localStorage.setItem('userInfo', JSON.stringify(action.payload));
         });

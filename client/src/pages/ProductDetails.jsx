@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { listProducts } from '../redux/slices/productSlice';
 import { addToCart } from '../redux/slices/cartSlice';
-import { addToWishlist } from '../redux/slices/wishlistSlice';
+import { addToWishlist, removeFromWishlist } from '../redux/slices/wishlistSlice';
+import { addToast } from '../redux/slices/toastSlice';
 import { createReview, getReviews, markHelpful, resetReviewSuccess } from '../redux/slices/reviewSlice';
 import { formatCurrency } from '../utils/currency';
 import StarRating from '../components/StarRating';
 import RelatedProducts from '../components/RelatedProducts';
-import { Heart, ShoppingCart, Star, Check, Truck, Shield, RotateCcw, User, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Check, Truck, ShieldCheck, User, ThumbsUp, ThumbsDown, Sprout, Droplets, Sun, Sparkles, MessageCircle, Phone, Plus, Minus } from 'lucide-react';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -18,8 +19,16 @@ const ProductDetails = () => {
     // Product State
     const [qty, setQty] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [isAdding, setIsAdding] = useState(false);
     const { products, loading: productLoading } = useSelector((state) => state.product);
+    const { items: wishlistItems } = useSelector((state) => state.wishlist);
     const product = products.find((p) => p.id === id);
+
+    const isSaved = wishlistItems?.some(item => (
+        item.productId === id ||
+        item.id === id ||
+        item.product?.id === id
+    ));
 
     // Review State
     const [rating, setRating] = useState(5);
@@ -32,12 +41,12 @@ const ProductDetails = () => {
         totalReviews,
         loading: reviewsLoading,
         success: reviewSuccess,
-        ratingDistribution
     } = useSelector((state) => state.review);
 
     const { userInfo } = useSelector((state) => state.auth);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         if (!products.length) {
             dispatch(listProducts());
         }
@@ -50,23 +59,72 @@ const ProductDetails = () => {
             setTitle('');
             setComment('');
             dispatch(resetReviewSuccess());
+            dispatch(addToast({ message: 'Thank you for your plant review! 🌿', type: 'success' }));
         }
     }, [reviewSuccess, dispatch]);
 
-    const addToCartHandler = () => {
-        dispatch(addToCart({
-            productId: product.id,
-            qty,
-            name: product.name,
-            price: product.price,
-            image: product.images?.[0] || product.image
-        }));
-        navigate('/cart');
+    const handleIncrement = () => {
+        const maxStock = product?.stock || 10;
+        setQty((prev) => Math.min(maxStock, prev + 1));
     };
 
-    const addToWishlistHandler = () => {
-        dispatch(addToWishlist(product.id));
+    const handleDecrement = () => {
+        setQty((prev) => Math.max(1, prev - 1));
     };
+
+    const addToCartHandler = async () => {
+        if (!product || isAdding || product.stock <= 0) return;
+        setIsAdding(true);
+        try {
+            await dispatch(addToCart({
+                productId: product.id,
+                qty,
+                name: product.name,
+                price: Number(product.price) || 0,
+                image: product.images?.[0] || product.image || 'https://via.placeholder.com/400',
+                stock: product.stock,
+            })).unwrap();
+
+            dispatch(addToast({
+                message: `🌿 Added ${qty} × "${product.name}" to cart!`,
+                type: 'success',
+                duration: 3500,
+                link: { text: 'View Cart 🛒', url: '/cart' }
+            }));
+        } catch {
+            dispatch(addToast({
+                message: `Added "${product.name}" to cart!`,
+                type: 'success',
+                duration: 3500,
+                link: { text: 'View Cart 🛒', url: '/cart' }
+            }));
+        } finally {
+            setTimeout(() => setIsAdding(false), 450);
+        }
+    };
+
+    const toggleWishlistHandler = async () => {
+        if (!product) return;
+        if (isSaved) {
+            await dispatch(removeFromWishlist(product.id));
+            dispatch(addToast({
+                message: `🤍 Removed "${product.name}" from saved list`,
+                type: 'info',
+                duration: 2500
+            }));
+        } else {
+            await dispatch(addToWishlist(product));
+            dispatch(addToast({
+                message: `❤️ "${product.name}" saved to wishlist!`,
+                type: 'success',
+                duration: 2500,
+                link: { text: 'View Wishlist', url: '/wishlist' }
+            }));
+        }
+    };
+
+    // Fallback alias for safety
+    const addToWishlistHandler = toggleWishlistHandler;
 
     const submitReviewHandler = (e) => {
         e.preventDefault();
@@ -78,48 +136,52 @@ const ProductDetails = () => {
         }));
     };
 
-    const handleHelpful = (reviewId, type) => {
-        dispatch(markHelpful({ reviewId, type }));
-    };
-
     if (productLoading || !product) {
         return (
             <div className="min-h-screen flex items-center justify-center pt-24">
-                <div className="glass p-8 rounded-3xl">
-                    <div className="animate-pulse text-gray-600">Loading product...</div>
+                <div className="glass p-8 rounded-3xl text-center">
+                    <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                    <div className="text-gray-600 font-medium">Nurturing plant details...</div>
                 </div>
             </div>
         );
     }
 
-    const images = product.images || [product.image || 'https://via.placeholder.com/400'];
+    const images = product.images?.length > 0 ? product.images : [product.image || 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&auto=format&fit=crop&q=80'];
+    const itemTotal = (Number(product.price) || 0) * qty;
 
     return (
-        <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen pt-24 pb-28 sm:pb-20 px-3 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-12 items-start mb-16">
-                    {/* Product Images */}
+                <div className="grid md:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-start mb-16">
+                    
+                    {/* Product Images Studio */}
                     <div className="space-y-4 fade-in-up">
-                        <div className="glass rounded-3xl overflow-hidden p-4">
-                            <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+                        <div className="glass rounded-3xl overflow-hidden p-3 sm:p-4 border border-emerald-100 bg-white/70 shadow-lg">
+                            <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-50 to-gray-50 relative">
                                 <img
                                     src={images[selectedImage]}
                                     alt={product.name}
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                                 />
+                                {product.discount > 0 && (
+                                    <div className="absolute top-3 left-3 bg-rose-500 text-white px-2.5 py-1 rounded-xl text-xs font-bold shadow-md">
+                                        -{product.discount}% OFF
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Thumbnail Gallery */}
                         {images.length > 1 && (
-                            <div className="grid grid-cols-4 gap-3">
+                            <div className="grid grid-cols-4 gap-2.5">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
                                         className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${selectedImage === idx
-                                            ? 'border-indigo-600 ring-2 ring-indigo-200'
-                                            : 'border-gray-200 hover:border-indigo-300'
+                                            ? 'border-emerald-600 ring-2 ring-emerald-200 scale-105'
+                                            : 'border-gray-200 hover:border-emerald-300'
                                             }`}
                                     >
                                         <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
@@ -130,112 +192,185 @@ const ProductDetails = () => {
                     </div>
 
                     {/* Product Info */}
-                    <div className="space-y-6 fade-in-up delay-100">
+                    <div className="space-y-5 sm:space-y-6 fade-in-up delay-100">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-white/20 mb-4">
-                                <span className="text-indigo-600 font-semibold text-xs uppercase tracking-wide">
-                                    {product.category?.name || 'Premium Collection'}
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 mb-2.5">
+                                <Sprout className="w-4 h-4 text-emerald-600" />
+                                <span className="text-emerald-800 font-bold text-xs uppercase tracking-wide">
+                                    {product.category?.name || 'Living Botanical Collection'}
                                 </span>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-2 leading-tight">
                                 {product.name}
                             </h1>
 
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="flex items-center gap-1">
-                                    <StarRating rating={averageRating || 0} size={20} />
-                                </div>
-                                <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
+                            <div className="flex items-center gap-3 mb-3">
+                                <StarRating rating={averageRating || 5} size={18} />
+                                <span className="text-gray-500 text-xs sm:text-sm font-medium">({totalReviews} customer reviews)</span>
                             </div>
 
-                            <p className="text-gray-700 text-lg leading-relaxed">
-                                {product.description || 'Experience premium quality and exceptional design with this carefully curated product. Crafted with attention to detail and built to last.'}
+                            <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed bg-white/70 p-3.5 sm:p-4 rounded-2xl border border-emerald-100/80">
+                                {product.description || 'Carefully potted in nutrient-rich organic soil to promote strong root establishment and vibrant foliage. Ready to brighten your home, balcony, or office space.'}
                             </p>
                         </div>
 
-                        <div className="glass rounded-2xl p-6 space-y-6">
-                            <div className="flex items-baseline gap-4">
-                                <span className="text-5xl font-bold text-gradient">
-                                    {formatCurrency(product.price)}
-                                </span>
-                                {product.price && (
-                                    <span className="text-gray-500 line-through text-xl">
-                                        {formatCurrency(product.price * 1.3)}
+                        {/* Mobile-Perfect Price & Cart Actions Card */}
+                        <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-4 border border-emerald-200/80 shadow-xl shadow-emerald-500/5">
+                            
+                            {/* Price Section */}
+                            <div className="flex flex-wrap items-baseline justify-between gap-2 pb-3 border-b border-gray-100">
+                                <div className="flex items-baseline gap-2.5">
+                                    <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-700 font-mono tracking-tight">
+                                        {formatCurrency(product.price)}
                                     </span>
-                                )}
-                                <span className="badge bg-green-100 text-green-700">Save 30%</span>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <label className="text-sm font-medium text-gray-700">Quantity:</label>
-                                    <select
-                                        value={qty}
-                                        onChange={(e) => setQty(Number(e.target.value))}
-                                        className="glass rounded-xl px-4 py-2 border border-white/20 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                    >
-                                        {[...Array(Math.max(0, Math.min(product.stock || 10, 10))).keys()].map((x) => (
-                                            <option key={x + 1} value={x + 1}>{x + 1}</option>
-                                        ))}
-                                    </select>
-                                    {product.stock > 0 ? (
-                                        <span className="text-sm text-green-600 font-medium flex items-center gap-1">
-                                            <Check className="w-4 h-4" /> In Stock
+                                    {product.originalPrice && product.originalPrice > product.price && (
+                                        <span className="text-gray-400 line-through text-base sm:text-lg font-medium">
+                                            {formatCurrency(product.originalPrice)}
                                         </span>
-                                    ) : (
-                                        <span className="text-sm text-red-600 font-medium">Out of Stock</span>
                                     )}
                                 </div>
 
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={addToCartHandler}
-                                        className={`flex-1 h-14 text-lg rounded-xl flex items-center justify-center gap-2 transition-all ${product.stock > 0 ? 'btn-primary' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
-                                        disabled={!product.stock || product.stock <= 0}
-                                    >
-                                        <ShoppingCart className="w-5 h-5" />
-                                        {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                                    </button>
-                                    <button
-                                        onClick={addToWishlistHandler}
-                                        className="h-14 px-6 rounded-xl glass border border-white/20 hover:bg-white/80 transition-all duration-300 hover:scale-105"
-                                    >
-                                        <Heart className="w-5 h-5 text-pink-500" />
-                                    </button>
+                                <div className="flex items-center gap-1.5">
+                                    {product.stock > 0 ? (
+                                        <span className="text-xs sm:text-sm text-emerald-800 font-bold bg-emerald-100/80 px-3 py-1 rounded-full flex items-center gap-1">
+                                            <Check className="w-3.5 h-3.5 text-emerald-600" /> In Stock ({product.stock})
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs sm:text-sm text-rose-700 font-bold bg-rose-100 px-3 py-1 rounded-full">
+                                            Out of Stock
+                                        </span>
+                                    )}
                                 </div>
+                            </div>
+
+                            {/* Quantity Stepper & Subtotal Row (Mobile Ergonomic) */}
+                            <div className="flex items-center justify-between gap-3 pt-1">
+                                <div>
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                                        Select Quantity:
+                                    </span>
+                                    
+                                    {/* Tactile Touch Stepper */}
+                                    <div className="inline-flex items-center bg-gray-100 rounded-2xl p-1 border border-gray-200">
+                                        <button
+                                            type="button"
+                                            onClick={handleDecrement}
+                                            disabled={qty <= 1}
+                                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-gray-700 flex items-center justify-center font-bold hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm active:scale-90 transition-all"
+                                            aria-label="Decrease quantity"
+                                        >
+                                            <Minus className="w-4 h-4" />
+                                        </button>
+
+                                        <span className="w-10 sm:w-12 text-center font-black text-base sm:text-lg font-mono text-gray-900 select-none">
+                                            {qty}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleIncrement}
+                                            disabled={qty >= (product.stock || 10)}
+                                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-gray-700 flex items-center justify-center font-bold hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm active:scale-90 transition-all"
+                                            aria-label="Increase quantity"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="text-right">
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">
+                                        Total Amount:
+                                    </span>
+                                    <span className="text-xl sm:text-2xl font-black text-gray-900 font-mono">
+                                        {formatCurrency(itemTotal)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Main CTA Buttons - Deluxe Botanical Design */}
+                            <div className="flex items-center gap-3 pt-3">
+                                <button
+                                    type="button"
+                                    onClick={addToCartHandler}
+                                    disabled={product.stock <= 0 || isAdding}
+                                    className={`relative overflow-hidden flex-1 h-14 sm:h-16 rounded-2xl text-base sm:text-lg font-black flex items-center justify-center gap-3 transition-all duration-300 shadow-xl active:scale-[0.98] ${
+                                        product.stock > 0
+                                            ? 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-emerald-700/30 hover:shadow-emerald-700/40 ring-2 ring-emerald-300/60'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                                    }`}
+                                >
+                                    {/* Animated Shimmer Ray */}
+                                    {product.stock > 0 && !isAdding && (
+                                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+                                    )}
+
+                                    {isAdding ? (
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>Adding to Botanical Cart...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2.5">
+                                            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                                            <span>{product.stock > 0 ? `Add to Cart • ${formatCurrency(itemTotal)}` : 'Out of Stock'}</span>
+                                        </div>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={toggleWishlistHandler}
+                                    className={`h-14 sm:h-16 w-14 sm:w-16 rounded-2xl border-2 transition-all duration-200 active:scale-90 flex items-center justify-center flex-shrink-0 shadow-md ${
+                                        isSaved
+                                            ? 'border-red-400 bg-red-50 text-red-500 ring-2 ring-red-300 shadow-red-500/20'
+                                            : 'border-gray-200 bg-white hover:bg-rose-50 text-gray-400 hover:text-red-500'
+                                    }`}
+                                    title={isSaved ? "Saved in Wishlist (Click to remove)" : "Save to Wishlist"}
+                                >
+                                    <Heart className={`w-6 h-6 transition-transform duration-300 ${isSaved ? 'fill-red-500 text-red-500 scale-110' : ''}`} />
+                                </button>
                             </div>
                         </div>
 
-                        {/* Features */}
-                        <div className="glass rounded-2xl p-6 space-y-4">
-                            <h3 className="font-semibold text-lg mb-4">Why Choose This Product?</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-                                        <Truck className="w-5 h-5 text-white" />
-                                    </div>
+                        {/* Living Plant Quality Guarantee */}
+                        <div className="bg-emerald-50/60 rounded-3xl p-4 sm:p-6 space-y-3.5 border border-emerald-200/80 shadow-sm">
+                            <h3 className="font-extrabold text-sm sm:text-base text-emerald-950 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-emerald-600" />
+                                Green Petals Plant Guarantee & Care
+                            </h3>
+
+                            <div className="grid grid-cols-1 gap-2.5 text-xs sm:text-sm text-gray-700">
+                                <div className="flex items-start gap-2.5 bg-white/70 p-2.5 rounded-xl border border-emerald-100">
+                                    <Sprout className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="font-semibold text-gray-900">Free Shipping</h4>
-                                        <p className="text-sm text-gray-600">On orders over ৳5000</p>
+                                        <strong className="text-gray-900 block">100% Viable Root Guarantee:</strong>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Nurtured with organic compost; free replacement if damaged in transit.</span>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-amber-400 flex items-center justify-center flex-shrink-0">
-                                        <Shield className="w-5 h-5 text-white" />
-                                    </div>
+
+                                <div className="flex items-start gap-2.5 bg-white/70 p-2.5 rounded-xl border border-emerald-100">
+                                    <Droplets className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="font-semibold text-gray-900">1-Year Warranty</h4>
-                                        <p className="text-sm text-gray-600">Full coverage included</p>
+                                        <strong className="text-gray-900 block">Moisture-Lock Protective Box:</strong>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Ventilated mailers keep roots hydrated across all 64 districts.</span>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-teal-400 flex items-center justify-center flex-shrink-0">
-                                        <RotateCcw className="w-5 h-5 text-white" />
-                                    </div>
+
+                                <div className="flex items-start gap-2.5 bg-white/70 p-2.5 rounded-xl border border-emerald-100">
+                                    <Truck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="font-semibold text-gray-900">30-Day Returns</h4>
-                                        <p className="text-sm text-gray-600">Hassle-free returns</p>
+                                        <strong className="text-gray-900 block">Express Plant Courier:</strong>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Barishal Metro ৳100 (24–48h) | All Other Districts ৳150 (2–4 days).</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-2.5 bg-white/70 p-2.5 rounded-xl border border-emerald-100">
+                                    <Phone className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <strong className="text-gray-900 block">Personal Care Advice:</strong>
+                                        <span className="text-gray-600 text-[11px] sm:text-xs">Call proprietor Munnar Khanam: <a href="tel:01768686120" className="text-emerald-700 font-bold hover:underline">01768686120</a></span>
                                     </div>
                                 </div>
                             </div>
@@ -243,154 +378,160 @@ const ProductDetails = () => {
                     </div>
                 </div>
 
-                {/* Reviews Section */}
-                <div className="glass rounded-3xl p-8 fade-in-up delay-200">
-                    <h2 className="text-3xl font-bold mb-8">Customer Reviews</h2>
+                {/* Customer Reviews Section */}
+                <div className="glass rounded-3xl p-5 sm:p-8 fade-in-up delay-200 border border-emerald-100 mb-16">
+                    <h2 className="text-xl sm:text-3xl font-bold mb-5 text-gray-900">Customer Plant Experiences</h2>
 
-                    <div className="grid lg:grid-cols-12 gap-12">
+                    <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-start">
                         {/* Rating Summary */}
-                        <div className="lg:col-span-4 space-y-8">
-                            <div className="text-center p-6 glass rounded-2xl bg-white/30">
-                                <div className="text-5xl font-bold mb-2">{averageRating?.toFixed(1) || 0}</div>
-                                <div className="flex justify-center mb-2">
-                                    <StarRating rating={averageRating || 0} size={24} />
-                                </div>
-                                <p className="text-gray-600">Based on {totalReviews} reviews</p>
+                        <div className="lg:col-span-4 p-5 glass rounded-2xl bg-emerald-50/40 border border-emerald-100 text-center">
+                            <div className="text-4xl sm:text-5xl font-black text-emerald-900 mb-1.5">{averageRating?.toFixed(1) || '5.0'}</div>
+                            <div className="flex justify-center mb-1.5">
+                                <StarRating rating={averageRating || 5} size={20} />
                             </div>
+                            <p className="text-xs text-gray-500">Based on {totalReviews} verified reviews</p>
+                        </div>
 
-                            <div className="space-y-3">
-                                {[5, 4, 3, 2, 1].map((star) => (
-                                    <div key={star} className="flex items-center gap-3">
-                                        <div className="flex items-center gap-1 w-16">
-                                            <span className="font-medium">{star}</span>
-                                            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                        </div>
-                                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-amber-400 rounded-full"
-                                                style={{ width: `${totalReviews ? (ratingDistribution?.[star] / totalReviews) * 100 : 0}%` }}
-                                            />
-                                        </div>
-                                        <div className="w-10 text-right text-sm text-gray-600">
-                                            {ratingDistribution?.[star] || 0}
+                        {/* Review Form */}
+                        <div className="lg:col-span-8">
+                            {userInfo ? (
+                                <form onSubmit={submitReviewHandler} className="space-y-3.5 glass p-5 rounded-2xl border border-emerald-100">
+                                    <h3 className="font-bold text-sm sm:text-base text-gray-900">Write a Review for {product.name}</h3>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                                            Your Rating (রেটিং নির্বাচন করুন)
+                                        </label>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-emerald-50/50 rounded-2xl border border-emerald-200">
+                                            <div className="flex items-center gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setRating(star)}
+                                                        className="p-1 hover:scale-125 active:scale-95 transition-all focus:outline-none"
+                                                        aria-label={`${star} star rating`}
+                                                    >
+                                                        <Star
+                                                            className={`w-7 h-7 transition-colors ${
+                                                                star <= rating
+                                                                    ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
+                                                                    : 'text-gray-300 hover:text-amber-300'
+                                                            }`}
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <span className="text-xs sm:text-sm font-bold text-emerald-900 sm:ml-2">
+                                                {rating === 5 && '🌱 5/5 - Thriving & Healthy Plant'}
+                                                {rating === 4 && '🌿 4/5 - Great Growth & Foliage'}
+                                                {rating === 3 && '🪴 3/5 - Average Plant Quality'}
+                                                {rating === 2 && '🍂 2/5 - Below Expectations'}
+                                                {rating === 1 && '⚠️ 1/5 - Poor Condition'}
+                                            </span>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-
-                            {!userInfo && (
-                                <div className="p-6 bg-indigo-50 rounded-2xl text-center">
-                                    <h3 className="font-semibold mb-2">Have this product?</h3>
-                                    <p className="text-sm text-gray-600 mb-4">Log in to share your thoughts with other customers.</p>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Review Headline</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="e.g. Arrived fresh with glossy leaves!"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="input-glass w-full text-xs sm:text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-600 mb-1">Your Feedback</label>
+                                        <textarea
+                                            rows="3"
+                                            required
+                                            placeholder="Share your experience with unboxing, foliage health, and packaging..."
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            className="input-glass w-full text-xs sm:text-sm resize-none"
+                                        />
+                                    </div>
                                     <button
-                                        onClick={() => navigate('/login')}
-                                        className="btn-primary w-full py-2 rounded-xl"
+                                        type="submit"
+                                        disabled={reviewsLoading}
+                                        className="btn-primary py-2.5 px-6 rounded-xl text-xs font-bold"
                                     >
+                                        {reviewsLoading ? 'Submitting...' : 'Submit Review'}
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="glass p-5 rounded-2xl text-center border border-emerald-100">
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-2.5">Please sign in to share your review of this plant.</p>
+                                    <button onClick={() => navigate('/login')} className="btn-primary py-2 px-5 rounded-xl text-xs font-bold">
                                         Log In to Review
                                     </button>
                                 </div>
                             )}
                         </div>
-
-                        {/* Reviews List & Form */}
-                        <div className="lg:col-span-8 space-y-8">
-                            {userInfo && (
-                                <div className="glass rounded-2xl p-6">
-                                    <h3 className="text-xl font-bold mb-4">Write a Review</h3>
-                                    <form onSubmit={submitReviewHandler} className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                                            <StarRating rating={rating} setRating={setRating} interactive={true} size={28} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                                            <input
-                                                type="text"
-                                                value={title}
-                                                onChange={(e) => setTitle(e.target.value)}
-                                                className="input-glass w-full"
-                                                placeholder="Summarize your experience"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Review</label>
-                                            <textarea
-                                                value={comment}
-                                                onChange={(e) => setComment(e.target.value)}
-                                                className="input-glass w-full h-32 resize-none"
-                                                placeholder="What did you like or dislike?"
-                                                required
-                                            />
-                                        </div>
-                                        <button type="submit" className="btn-primary px-4 sm:px-8 py-3 rounded-xl">
-                                            Submit Review
-                                        </button>
-                                    </form>
-                                </div>
-                            )}
-
-                            <div className="space-y-6">
-                                {reviewsLoading ? (
-                                    <div className="text-center py-8">Loading reviews...</div>
-                                ) : reviews.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-500">
-                                        No reviews yet. Be the first to review!
-                                    </div>
-                                ) : (
-                                    reviews.map((review) => (
-                                        <div key={review.id} className="glass rounded-2xl p-6">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                                                        {review.user?.name.charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold flex items-center gap-2">
-                                                            {review.user?.name}
-                                                            {review.verified && (
-                                                                <span className="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                                    <Check className="w-3 h-3" /> Verified
-                                                                </span>
-                                                            )}
-                                                        </h4>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                            <StarRating rating={review.rating} size={14} />
-                                                            <span>•</span>
-                                                            <span>{new Date(review.createdAt).toLocaleDateString()}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <h5 className="font-bold text-lg mb-2">{review.title}</h5>
-                                            <p className="text-gray-700 mb-4 whitespace-pre-line">{review.comment}</p>
-
-                                            <div className="flex items-center gap-4">
-                                                <button
-                                                    onClick={() => handleHelpful(review.id, 'helpful')}
-                                                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-indigo-600 transition-colors"
-                                                >
-                                                    <ThumbsUp className="w-4 h-4" />
-                                                    Helpful ({review.helpful || 0})
-                                                </button>
-                                                <button
-                                                    onClick={() => handleHelpful(review.id, 'notHelpful')}
-                                                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors"
-                                                >
-                                                    <ThumbsDown className="w-4 h-4" />
-                                                    Not Helpful ({review.notHelpful || 0})
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
                     </div>
+
+                    {/* Reviews List */}
+                    {reviews?.length > 0 && (
+                        <div className="mt-6 space-y-3 pt-5 border-t border-emerald-100">
+                            {reviews.map((rev) => (
+                                <div key={rev.id} className="p-3.5 rounded-2xl bg-white border border-emerald-50 shadow-sm space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-xs sm:text-sm text-gray-900">{rev.user?.name || 'Plant Parent'}</span>
+                                        <StarRating rating={rev.rating} size={13} />
+                                    </div>
+                                    {rev.title && <h4 className="font-semibold text-xs text-emerald-800">{rev.title}</h4>}
+                                    <p className="text-xs text-gray-600 leading-relaxed">{rev.comment}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <RelatedProducts categoryId={product.categoryId} currentProductId={product.id} />
+                {/* Related Plants */}
+                {product.categoryId && (
+                    <RelatedProducts currentProductId={product.id} categoryId={product.categoryId} />
+                )}
+            </div>
+
+            {/* Mobile Fixed Bottom Sticky Bar for Fast Checkout */}
+            <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-emerald-100 p-3 shadow-2xl flex items-center justify-between gap-3">
+                <div className="min-w-[80px]">
+                    <span className="text-[10px] text-gray-400 block font-bold uppercase tracking-wider">Total</span>
+                    <span className="text-lg font-black text-emerald-800 font-mono leading-none">{formatCurrency(itemTotal)}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                    <button
+                        type="button"
+                        onClick={toggleWishlistHandler}
+                        className={`w-12 h-12 rounded-xl border-2 transition-all active:scale-90 flex items-center justify-center flex-shrink-0 ${
+                            isSaved
+                                ? 'border-red-400 bg-red-50 text-red-500 ring-2 ring-red-200 shadow-sm'
+                                : 'border-gray-200 text-gray-400 bg-white hover:text-red-500'
+                        }`}
+                        title={isSaved ? "Saved" : "Wishlist"}
+                    >
+                        <Heart className={`w-5 h-5 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={addToCartHandler}
+                        disabled={product.stock <= 0 || isAdding}
+                        className="flex-1 h-12 px-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                        {isAdding ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>Adding...</span>
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingCart className="w-4 h-4" />
+                                <span>Add to Cart</span>
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );

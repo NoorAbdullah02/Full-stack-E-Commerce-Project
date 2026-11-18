@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { listProducts } from '../redux/slices/productSlice';
 import { addToCart } from '../redux/slices/cartSlice';
-import { addToWishlist } from '../redux/slices/wishlistSlice';
+import { addToWishlist, removeFromWishlist } from '../redux/slices/wishlistSlice';
+import { addToast } from '../redux/slices/toastSlice';
 import { formatCurrency } from '../utils/currency';
 import StarRating from '../components/StarRating';
 import FilterSidebar from '../components/FilterSidebar';
@@ -17,6 +18,7 @@ const Products = () => {
     const [showFilters, setShowFilters] = useState(false);
 
     const { products, loading, error, page, pages, total } = useSelector((state) => state.product);
+    const { items: wishlistItems } = useSelector((state) => state.wishlist);
 
     // Local state for filters to handle updates
     const [filters, setFilters] = useState({
@@ -27,12 +29,6 @@ const Products = () => {
         sort: searchParams.get('sort') || '',
         pageNumber: Number(searchParams.get('pageNumber')) || 1
     });
-
-    // Initial sync with URL only on mount
-    useEffect(() => {
-        // Only set if params exist, to avoid overwriting initial state unnecessarily
-        // This is simplified to just rely on initial state setting or manual filter changes
-    }, []);
 
     useEffect(() => {
         // Fetch products when filters/URL params change
@@ -51,86 +47,128 @@ const Products = () => {
         setSearchParams(params);
     }, [filters, setSearchParams]);
 
-    const addToCartHandler = (product) => {
-        dispatch(addToCart({
-            productId: product.id,
-            qty: 1,
-            name: product.name,
-            price: product.price,
-            image: product.images?.[0] || product.image
-        }));
-        navigate('/cart');
+    const isProductSaved = (productId) => {
+        return wishlistItems?.some(item => (
+            item.productId === productId ||
+            item.id === productId ||
+            item.product?.id === productId
+        ));
+    };
+
+    const toggleWishlistHandler = async (product, e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const saved = isProductSaved(product.id);
+        if (saved) {
+            await dispatch(removeFromWishlist(product.id));
+            dispatch(addToast({
+                message: `🤍 Removed "${product.name}" from saved list`,
+                type: 'info',
+                duration: 2500
+            }));
+        } else {
+            await dispatch(addToWishlist(product));
+            dispatch(addToast({
+                message: `❤️ "${product.name}" saved to wishlist!`,
+                type: 'success',
+                duration: 2500,
+                link: { text: 'View Wishlist', url: '/wishlist' }
+            }));
+        }
+    };
+
+    const addToCartHandler = async (product) => {
+        try {
+            await dispatch(addToCart({
+                productId: product.id,
+                qty: 1,
+                name: product.name,
+                price: Number(product.price) || 0,
+                image: product.images?.[0] || 'https://via.placeholder.com/400'
+            })).unwrap();
+
+            dispatch(addToast({
+                message: `🌿 "${product.name}" added to cart!`,
+                type: 'success',
+                duration: 3500,
+                link: { text: 'View Cart 🛒', url: '/cart' }
+            }));
+        } catch {
+            dispatch(addToast({
+                message: `Added "${product.name}" to cart!`,
+                type: 'success',
+                duration: 3500,
+                link: { text: 'View Cart 🛒', url: '/cart' }
+            }));
+        }
     };
 
     return (
         <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-                        Explore Collections
-                    </h1>
-                    <div className="w-full md:w-auto flex items-center gap-4">
-                        <div className="hidden md:block">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl sm:text-4xl font-extrabold text-gradient">
+                            Botanical Plant Catalog
+                        </h1>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                            Showing {total || products.length} fresh live plants & botanical accessories
+                        </p>
+                    </div>
+
+                    <div className="w-full sm:w-auto flex items-center gap-3">
+                        <div className="hidden md:block w-72">
                             <SearchBar />
                         </div>
                         <button
-                            className="md:hidden p-3 glass rounded-xl border border-white/20"
-                            onClick={() => setShowFilters(!showFilters)}
+                            className="md:hidden w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:bg-emerald-700 active:scale-95 transition-all"
+                            onClick={() => setShowFilters(true)}
                         >
-                            <SlidersHorizontal className="w-5 h-5" />
+                            <SlidersHorizontal className="w-4 h-4" />
+                            <span>Filters & Sort Options</span>
                         </button>
                     </div>
                 </div>
 
-                <div className="md:hidden mb-6">
+                <div className="md:hidden mb-5">
                     <SearchBar />
                 </div>
 
                 <div className="grid lg:grid-cols-4 gap-8">
                     {/* Mobile Filter Overlay */}
-                    <div className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilters(false)}></div>
-                        <div className={`absolute right-0 top-0 bottom-0 w-[300px] bg-white p-6 shadow-2xl transition-transform duration-300 transform ${showFilters ? 'translate-x-0' : 'translate-x-full'}`}>
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold">Filters</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                                    <X className="w-6 h-6 text-gray-500" />
+                    <div className={`fixed inset-0 z-[150] lg:hidden transition-opacity duration-300 ${showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFilters(false)}></div>
+                        <div className={`absolute right-0 top-0 bottom-0 w-[85vw] max-w-xs bg-white p-6 shadow-2xl transition-transform duration-300 transform ${showFilters ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
+                            <div className="flex justify-between items-center mb-6 pb-4 border-b border-emerald-100">
+                                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <SlidersHorizontal className="w-5 h-5 text-emerald-600" />
+                                    Filter Plants
+                                </h3>
+                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-emerald-50 text-gray-700 rounded-xl">
+                                    <X className="w-6 h-6" />
                                 </button>
                             </div>
                             <FilterSidebar
                                 filters={filters}
                                 setFilters={setFilters}
-                                className="h-full overflow-y-auto pb-20"
+                                className="border-0 shadow-none p-0"
                             />
                         </div>
                     </div>
 
-                    {/* Desktop Sidebar */}
-                    <div className="hidden lg:block">
-                        <FilterSidebar
-                            filters={filters}
-                            setFilters={setFilters}
-                            className="sticky top-24"
-                        />
+                    {/* Desktop Filter Sidebar */}
+                    <div className="hidden lg:block lg:col-span-1">
+                        <FilterSidebar filters={filters} setFilters={setFilters} />
                     </div>
 
-                    {/* Product Grid */}
-                    <div className="lg:col-span-3 space-y-8">
-                        {error ? (
-                            <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-12 rounded-3xl text-center">
-                                <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-                                <p>{error}</p>
-                                <button
-                                    onClick={() => dispatch(listProducts(filters))}
-                                    className="mt-4 btn-primary px-6 py-2 rounded-xl"
-                                >
-                                    Try Again
-                                </button>
-                            </div>
-                        ) : loading ? (
+                    {/* Product List */}
+                    <div className="lg:col-span-3">
+                        {loading ? (
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[...Array(6)].map((_, i) => (
-                                    <div key={i} className="glass rounded-3xl p-4 h-[400px] animate-pulse">
+                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    <div key={i} className="card-glass animate-pulse">
                                         <div className="bg-gray-200 h-48 rounded-2xl mb-4"></div>
                                         <div className="bg-gray-200 h-6 w-3/4 rounded mb-2"></div>
                                         <div className="bg-gray-200 h-4 w-1/2 rounded"></div>
@@ -144,81 +182,151 @@ const Products = () => {
                             </div>
                         ) : (
                             <>
-                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {products.map((product) => (
-                                        <div key={product.id} className="card-glass group">
-                                            <div className="relative aspect-square overflow-hidden bg-gray-100">
-                                                <img
-                                                    src={product.images?.[0] || product.image}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-                                                    <button
-                                                        onClick={() => addToCartHandler(product)}
-                                                        className="w-12 h-12 rounded-full bg-white text-indigo-600 flex items-center justify-center hover:scale-110 transition-transform btn-primary"
-                                                        disabled={product.stock === 0}
-                                                    >
-                                                        <ShoppingCart className="w-5 h-5" />
-                                                    </button>
-                                                    <Link
-                                                        to={`/product/${product.id}`}
-                                                        className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/30 transition-colors"
-                                                    >
-                                                        <Star className="w-5 h-5" />
-                                                    </Link>
-                                                </div>
-                                                {product.stock === 0 && (
-                                                    <div className="absolute top-4 right-4 bg-red-500/90 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full">
-                                                        Out of Stock
-                                                    </div>
-                                                )}
-                                            </div>
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                                    {products.map((product) => {
+                                        const saved = isProductSaved(product.id);
+                                        return (
+                                            <div key={product.id} className="card-glass group flex flex-col justify-between">
+                                                <div className="relative aspect-square overflow-hidden bg-gray-100 rounded-xl">
+                                                    <img
+                                                        src={product.images?.[0] || product.image}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    />
 
-                                            <div className="p-5">
-                                                <Link to={`/product/${product.id}`}>
-                                                    <h3 className="font-bold text-lg mb-1 truncate hover:text-indigo-600 transition-colors">
-                                                        {product.name}
-                                                    </h3>
-                                                </Link>
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <span className="text-gray-500 text-sm">{product.category?.name}</span>
-                                                    <div className="flex items-center gap-1">
-                                                        <StarRating rating={4.5} size={14} /> {/* Placeholder average, real requires relation */}
-                                                        <span className="text-xs text-gray-400">({product.reviews?.length || 0})</span>
+                                                    {/* Saved (Love) Button - Top Right of Image: RED when saved, WHITE when not */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => toggleWishlistHandler(product, e)}
+                                                        aria-label={saved ? "Remove from saved" : "Save plant"}
+                                                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md active:scale-90 ${
+                                                            saved
+                                                                ? 'bg-white text-red-500 ring-2 ring-red-400 shadow-red-500/20'
+                                                                : 'bg-black/35 backdrop-blur-md text-white hover:bg-black/50 hover:scale-105'
+                                                        }`}
+                                                        title={saved ? "Saved (Click to remove)" : "Save plant"}
+                                                    >
+                                                        <Heart
+                                                            className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${
+                                                                saved
+                                                                    ? 'fill-red-500 text-red-500 scale-110'
+                                                                    : 'text-white fill-white/10'
+                                                            }`}
+                                                        />
+                                                    </button>
+
+                                                    {/* Out of stock or discount badges */}
+                                                    {product.stock === 0 ? (
+                                                        <div className="absolute top-2 left-2 bg-red-500/95 backdrop-blur text-white text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-lg shadow-sm">
+                                                            Out of Stock
+                                                        </div>
+                                                    ) : product.discount > 0 ? (
+                                                        <div className="absolute top-2 left-2 bg-rose-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-lg shadow-sm">
+                                                            -{product.discount}%
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+
+                                                <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
+                                                    <div>
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <span className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide font-medium truncate">
+                                                                {product.category?.name || 'Plant'}
+                                                            </span>
+                                                            <div className="flex items-center gap-1">
+                                                                <StarRating rating={4.5} size={12} />
+                                                                <span className="text-[10px] sm:text-xs text-gray-400">({product.reviews?.length || 0})</span>
+                                                            </div>
+                                                        </div>
+                                                        <Link to={`/product/${product.id}`}>
+                                                            <h3 className="font-bold text-xs sm:text-base text-gray-900 mb-2 line-clamp-2 hover:text-emerald-700 transition-colors">
+                                                                {product.name}
+                                                            </h3>
+                                                        </Link>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                                        <div>
+                                                            <span className="text-sm sm:text-xl font-extrabold text-emerald-800">
+                                                                {formatCurrency(product.price)}
+                                                            </span>
+                                                            {product.originalPrice && product.originalPrice > product.price && (
+                                                                <span className="text-[10px] sm:text-xs text-gray-400 line-through block">
+                                                                    {formatCurrency(product.originalPrice)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => toggleWishlistHandler(product, e)}
+                                                                className={`p-1.5 sm:p-2 rounded-full transition-all duration-200 active:scale-95 ${
+                                                                    saved
+                                                                        ? 'bg-rose-50 text-red-500 ring-1 ring-red-200'
+                                                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-red-500'
+                                                                }`}
+                                                                title={saved ? "Saved" : "Save"}
+                                                            >
+                                                                <Heart className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${saved ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => addToCartHandler(product)}
+                                                                disabled={product.stock === 0}
+                                                                className="p-1.5 sm:p-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+                                                                title="Add to Cart"
+                                                            >
+                                                                <ShoppingCart className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xl font-bold text-gradient">
-                                                        {formatCurrency(product.price)}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => dispatch(addToWishlist(product.id))}
-                                                        className="p-2 hover:bg-pink-50 rounded-full transition-colors group/heart"
-                                                    >
-                                                        <Heart className="w-5 h-5 text-gray-400 group-hover/heart:text-pink-500 transition-colors" />
-                                                    </button>
-                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
-                                {/* Pagination */}
+                                {/* Luxury Botanical Pagination */}
                                 {pages > 1 && (
-                                    <div className="flex justify-center gap-2 mt-8">
+                                    <div className="flex flex-wrap items-center justify-center gap-2 mt-12 pt-6 border-t border-emerald-100">
+                                        <button
+                                            disabled={page <= 1}
+                                            onClick={() => {
+                                                setFilters(prev => ({ ...prev, pageNumber: page - 1 }));
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                            className="px-4 py-2.5 rounded-xl border border-emerald-200 bg-white text-xs sm:text-sm font-bold text-gray-700 hover:bg-emerald-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                                        >
+                                            ‹ Previous
+                                        </button>
+
                                         {[...Array(pages).keys()].map((x) => (
                                             <button
                                                 key={x + 1}
-                                                onClick={() => setFilters(prev => ({ ...prev, pageNumber: x + 1 }))}
-                                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${page === x + 1
-                                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                                                    : 'glass hover:bg-white/80'
+                                                onClick={() => {
+                                                    setFilters(prev => ({ ...prev, pageNumber: x + 1 }));
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className={`w-10 h-10 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center transition-all ${page === x + 1
+                                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-300'
+                                                    : 'border border-emerald-100 bg-white hover:bg-emerald-50 text-gray-700'
                                                     }`}
                                             >
                                                 {x + 1}
                                             </button>
                                         ))}
+
+                                        <button
+                                            disabled={page >= pages}
+                                            onClick={() => {
+                                                setFilters(prev => ({ ...prev, pageNumber: page + 1 }));
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                            className="px-4 py-2.5 rounded-xl border border-emerald-200 bg-white text-xs sm:text-sm font-bold text-gray-700 hover:bg-emerald-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                                        >
+                                            Next ›
+                                        </button>
                                     </div>
                                 )}
                             </>

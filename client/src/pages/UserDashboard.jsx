@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { listMyOrders } from '../redux/slices/orderSlice';
 import { formatCurrency } from '../utils/currency';
+import { showError } from '../utils/alerts';
 import { Link } from 'react-router-dom';
 import { User, Package, Download, Calendar } from 'lucide-react';
 import axios from 'axios';
@@ -33,7 +34,7 @@ const UserDashboard = () => {
             link.click();
             link.remove();
         } catch (error) {
-            alert('Failed to download invoice');
+            showError('ডাউনলোড ব্যর্থ', 'ইনভয়েস ডাউনলোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।');
         }
     };
 
