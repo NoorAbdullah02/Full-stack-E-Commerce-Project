@@ -1,37 +1,40 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
-import UserDashboard from './pages/UserDashboard';
-import AdminDashboard from './pages/AdminDashboard';
+import ScrollToTop from './components/ScrollToTop';
+import ChatBot from './components/ChatBot';
+import ToastContainer from './components/Toast';
 
+// Core Priority Pages (Immediate Instant Load)
 import Home from './pages/Home';
-// Placeholder Pages
+import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
-import Checkout from './pages/Checkout';
-import ChatBot from './components/ChatBot';
-import Wishlist from './pages/Wishlist';
-import ResetPassword from './pages/ResetPassword';
-import ForgotPassword from './pages/ForgotPassword';
-import VerifyOTP from './pages/VerifyOTP';
-import Products from './pages/Products';
-import ToastContainer from './components/Toast';
-import OrderTracking from './pages/OrderTracking';
-import Contact from './pages/Contact';
-import FAQ from './pages/FAQ';
-import About from './pages/About';
-import NotFound from './pages/NotFound';
+// Code-Split Dynamic Secondary & Admin Pages (Loaded on demand for ultra-speed)
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const OrderTracking = lazy(() => import('./pages/OrderTracking'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const VerifyOTP = lazy(() => import('./pages/VerifyOTP'));
+const Contact = lazy(() => import('./pages/Contact'));
+const FAQ = lazy(() => import('./pages/FAQ'));
+const About = lazy(() => import('./pages/About'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Placeholder Pages
-// const Home = () => <div className="p-10 font-bold text-3xl">Home Page</div>;
-// const ProductDetails = () => <div className="p-10">Product Details</div>;
-// const Cart = () => <div className="p-10">Cart</div>;
-// const AdminDashboard = () => <div className="p-10">Admin Dashboard</div>;
-
-import ScrollToTop from './components/ScrollToTop';
+// Fast Lightweight Loading Shimmer
+const PageLoader = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 space-y-3">
+    <div className="w-10 h-10 rounded-full border-3 border-emerald-200 border-t-emerald-600 animate-spin"></div>
+    <span className="text-xs font-bold text-emerald-800 tracking-wider animate-pulse">🌿 Loading Green Petals...</span>
+  </div>
+);
 
 function App() {
   return (
@@ -39,36 +42,37 @@ function App() {
       <ScrollToTop />
       <main className="min-h-screen bg-background text-foreground relative">
         <Navbar />
-        {/* Header/Navbar would go here */}
         <div className="w-full">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/verify-otp" element={<VerifyOTP />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/verify-otp" element={<VerifyOTP />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/profile" element={<UserDashboard />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/order/:id" element={<OrderTracking />} />
-            </Route>
+              {/* Protected Customer Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/profile" element={<UserDashboard />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/order/:id" element={<OrderTracking />} />
+              </Route>
 
-            {/* Admin Routes */}
-            <Route element={<ProtectedRoute adminOnly={true} />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Route>
-          </Routes>
+              {/* Protected Admin Routes */}
+              <Route element={<ProtectedRoute adminOnly={true} />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </div>
         <ChatBot />
         <ToastContainer />

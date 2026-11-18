@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const { PrismaClient } = require('@prisma/client');
@@ -18,6 +19,9 @@ if (fs.existsSync(rootEnvPath)) {
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
+
+// High-speed HTTP Gzip/Brotli response compression
+app.use(compression());
 
 // Security & Helmet (allow botanical external images & font assets)
 app.use(helmet({
@@ -68,11 +72,21 @@ app.use('/api/reviews', require('./routes/reviewRoutes'));
 // Serve Frontend (Client Build) when available - Allows single-service Render deployment
 const clientDistPath = path.join(__dirname, '../client/dist');
 if (fs.existsSync(clientDistPath)) {
-    app.use(express.static(clientDistPath));
+    // Aggressive immutable caching for fingerprinted assets; no-cache for index.html
+    app.use(express.static(clientDistPath, {
+        maxAge: '1y',
+        immutable: true,
+        setHeaders: (res, filePath) => {
+            if (filePath.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            }
+        }
+    }));
     app.get('*', (req, res, next) => {
         if (req.path.startsWith('/api')) {
             return next();
         }
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.sendFile(path.join(clientDistPath, 'index.html'));
     });
 } else {
