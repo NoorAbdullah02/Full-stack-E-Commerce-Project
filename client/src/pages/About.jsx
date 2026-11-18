@@ -7,9 +7,16 @@ const About = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Hero Section */}
                 <div className="text-center mb-16 fade-in-up">
+                    <div className="flex justify-center mb-4">
+                        <img
+                            src="/logo.png"
+                            alt="Green Petals Garden Centre"
+                            className="w-24 h-24 rounded-full object-cover shadow-xl ring-4 ring-emerald-500/20 bg-white"
+                        />
+                    </div>
                     <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
                         <Sprout className="w-4 h-4 text-emerald-600" />
-                        About Green Petals
+                        About Green Petals • Garden Centre
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
                         Nurturing <span className="text-gradient">Green Spaces</span> with Love

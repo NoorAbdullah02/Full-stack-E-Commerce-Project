@@ -54,10 +54,15 @@ const Navbar = () => {
                         <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
                             {/* Logo */}
                             <Link to="/" className="flex items-center space-x-2.5 group flex-shrink-0">
-                                <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-300">
-                                    <Sprout className="w-5 h-5 text-white" />
+                                <img
+                                    src="/logo.png"
+                                    alt="Green Petals Garden Centre"
+                                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/30 group-hover:scale-105 transition-transform duration-300 bg-white"
+                                />
+                                <div className="flex flex-col">
+                                    <span className="text-lg sm:text-xl font-black text-gradient tracking-tight whitespace-nowrap leading-tight">Green Petals</span>
+                                    <span className="text-[9px] text-emerald-700 font-bold tracking-widest uppercase -mt-0.5">Garden Centre</span>
                                 </div>
-                                <span className="text-xl sm:text-2xl font-black text-gradient tracking-tight whitespace-nowrap">Green Petals</span>
                             </Link>
 
                             {/* Desktop Navigation Links */}
@@ -201,11 +206,16 @@ const Navbar = () => {
                         {/* Drawer Header */}
                         <div>
                             <div className="flex items-center justify-between pb-5 border-b border-emerald-100 mb-5">
-                                <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center space-x-2">
-                                    <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow">
-                                        <Sprout className="w-5 h-5" />
+                                <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center space-x-2.5">
+                                    <img
+                                        src="/logo.png"
+                                        alt="Green Petals Garden Centre"
+                                        className="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-emerald-500/30 bg-white"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-black text-gradient leading-tight">Green Petals</span>
+                                        <span className="text-[9px] text-emerald-700 font-bold tracking-widest uppercase -mt-0.5">Garden Centre</span>
                                     </div>
-                                    <span className="text-xl font-black text-gradient">Green Petals</span>
                                 </Link>
 
                                 <button

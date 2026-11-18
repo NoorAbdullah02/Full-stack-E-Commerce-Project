@@ -1,4 +1,6 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 const generateInvoicePDF = (order, user) => {
     return new Promise((resolve, reject) => {
@@ -34,21 +36,32 @@ const generateInvoicePDF = (order, user) => {
             doc.rect(0, 0, 612, 120).fill(primaryColor);
             doc.rect(0, 100, 612, 20).fillOpacity(0.3).fill(accentColor).fillOpacity(1);
 
-            // Green Petals Botanical Logo Emblem
-            doc.circle(70, 60, 25).fill('#ffffff');
-            doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold')
-                .text('GP', 58, 52);
+            // Green Petals Botanical Logo
+            const logoPath = path.join(__dirname, '../assets/logo.png');
+            if (fs.existsSync(logoPath)) {
+                try {
+                    doc.image(logoPath, 50, 35, { width: 50, height: 50 });
+                } catch (e) {
+                    doc.circle(75, 60, 25).fill('#ffffff');
+                    doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold')
+                        .text('GP', 63, 52);
+                }
+            } else {
+                doc.circle(75, 60, 25).fill('#ffffff');
+                doc.fillColor(primaryColor).fontSize(16).font('Helvetica-Bold')
+                    .text('GP', 63, 52);
+            }
 
             // Brand name and tagline
             doc.fillColor('#ffffff')
-                .fontSize(24)
+                .fontSize(23)
                 .font('Helvetica-Bold')
-                .text('Green Petals', 110, 45);
+                .text('Green Petals', 112, 42);
 
             doc.fontSize(10)
                 .font('Helvetica')
                 .fillColor('#dcfce7')
-                .text('Botanical Nursery & Living Plants Boutique', 110, 72);
+                .text('Garden Centre • Living Plants & Botanical Boutique', 112, 68);
 
             // Owner & Contact Info (right aligned)
             const ownerPhone = process.env.OWNER_PHONE || '01768686120';
@@ -57,10 +70,10 @@ const generateInvoicePDF = (order, user) => {
             doc.fontSize(9)
                 .font('Helvetica')
                 .fillColor('#ffffff')
-                .text('Dhaka, Bangladesh', 380, 42, { align: 'right', width: 170 })
-                .text(`Proprietor: Munnar Khanam`, 380, 55, { align: 'right', width: 170 })
-                .text(ownerEmail, 380, 68, { align: 'right', width: 170 })
-                .text(`Hotline: ${ownerPhone}`, 380, 81, { align: 'right', width: 170 });
+                .text('Barishal Metro, Bangladesh', 380, 40, { align: 'right', width: 170 })
+                .text(`Proprietor: Munnar Khanam`, 380, 53, { align: 'right', width: 170 })
+                .text(ownerEmail, 380, 66, { align: 'right', width: 170 })
+                .text(`Hotline: ${ownerPhone}`, 380, 79, { align: 'right', width: 170 });
 
             // ========== INVOICE TITLE ==========
             doc.fillColor(darkGray)
@@ -114,8 +127,8 @@ const generateInvoicePDF = (order, user) => {
                 day: 'numeric'
             });
 
-            const paymentDisplay = order.transactionId ? 'bKash (Online)' : (order.paymentMethod || 'Cash on Delivery');
-            const trxDisplay = order.transactionId ? order.transactionId : 'N/A (Cash on Delivery)';
+            const paymentDisplay = 'bKash Send Money';
+            const trxDisplay = order.transactionId ? `TrxID: ${order.transactionId}` : 'Prepaid (Verified)';
 
             doc.font('Helvetica-Bold').fillColor(darkGray)
                 .text(`INV-${order.id.slice(0, 8).toUpperCase()}`, 160, boxY + 32)
@@ -129,7 +142,7 @@ const generateInvoicePDF = (order, user) => {
             doc.lineWidth(0.5).strokeColor('#86efac').fillColor(lightGray).fillAndStroke();
 
             doc.fillColor(darkGray).fontSize(11).font('Helvetica-Bold')
-                .text('Billed To', 325, boxY + 12);
+                .text('Billed & Shipped To', 325, boxY + 12);
 
             const customerDisplayName = (user?.name || 'Valued Customer')
                 .replace(/\(Super Admin\)/gi, '(Owner)')
@@ -140,9 +153,9 @@ const generateInvoicePDF = (order, user) => {
 
             doc.font('Helvetica').fillColor(mediumGray)
                 .text(user?.email || '', 325, boxY + 47)
-                .text(order.shippingAddress?.phone || user?.phone || 'Hotline: ' + ownerPhone, 325, boxY + 62)
+                .text(order.shippingAddress?.phone || user?.phone || 'Customer Phone: N/A', 325, boxY + 62)
                 .text(`${order.shippingAddress?.address || ''}`, 325, boxY + 77, { width: 215, ellipsis: true })
-                .text(`${order.shippingAddress?.city || 'Dhaka'}, Bangladesh`, 325, boxY + 92, { width: 215, ellipsis: true });
+                .text(`${order.shippingAddress?.city || 'Barishal'}, Bangladesh`, 325, boxY + 92, { width: 215, ellipsis: true });
 
             // ========== TABLE OF ITEMS ==========
             const tableTop = 325;
@@ -204,11 +217,11 @@ const generateInvoicePDF = (order, user) => {
             doc.moveTo(50, footerY).lineTo(550, footerY).strokeColor('#86efac').stroke();
 
             doc.fontSize(10).font('Helvetica-Bold').fillColor(primaryColor)
-                .text('Thank you for shopping with Green Petals!', 50, footerY + 15, { align: 'center', width: 500 });
+                .text('Thank you for choosing Green Petals Garden Centre!', 50, footerY + 15, { align: 'center', width: 500 });
 
             doc.fontSize(8).font('Helvetica').fillColor(mediumGray)
-                .text(`Proprietor: Munnar Khanam | Hotline: ${ownerPhone} | Email: ${ownerEmail}`, 50, footerY + 30, { align: 'center', width: 500 })
-                .text(`Facebook: facebook.com/munnar.khanam | Delivering Healthy Live Plants Across Bangladesh`, 50, footerY + 44, { align: 'center', width: 500 });
+                .text(`Proprietor: Munnar Khanam | Helpline: ${ownerPhone} | Email: ${ownerEmail}`, 50, footerY + 30, { align: 'center', width: 500 })
+                .text(`Facebook: https://www.facebook.com/share/1E2Y48eA5s/ | 100% Viable Root Botanical Guarantee`, 50, footerY + 44, { align: 'center', width: 500 });
 
             doc.end();
         } catch (err) {

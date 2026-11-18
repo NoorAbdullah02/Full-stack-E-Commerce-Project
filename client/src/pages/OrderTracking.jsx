@@ -128,11 +128,14 @@ const OrderTracking = () => {
 
                 <div className="glass rounded-3xl p-8">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                        <div>
-                            <h1 className="text-2xl font-bold mb-1">Order #{order.id.slice(0, 8)}</h1>
-                            <p className="text-gray-500 text-sm">
-                                Placed on {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
+                        <div className="flex items-center gap-3">
+                            <img src="/logo.png" alt="Green Petals" className="w-12 h-12 rounded-full object-cover shadow ring-2 ring-emerald-500/20 bg-white flex-shrink-0" />
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-bold mb-0.5">Order #{order.id.slice(0, 8)}</h1>
+                                <p className="text-gray-500 text-xs sm:text-sm">
+                                    Placed on {new Date(order.createdAt).toLocaleDateString('en-BD')} • Green Petals Garden Centre
+                                </p>
+                            </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className={`px-4 py-2 rounded-full font-medium text-sm border ${order.status === 'CANCELLED'

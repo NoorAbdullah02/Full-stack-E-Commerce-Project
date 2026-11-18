@@ -36,10 +36,15 @@ const Register = () => {
 
             <div className="glass max-w-md w-full p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 relative z-10 animate-scale-in">
                 {/* Logo/Icon */}
-                <div className="flex justify-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                        <Sparkles className="w-8 h-8 text-white" />
-                    </div>
+                <div className="flex justify-center mb-6">
+                    <Link to="/" className="group flex flex-col items-center">
+                        <img
+                            src="/logo.png"
+                            alt="Green Petals Garden Centre"
+                            className="w-20 h-20 rounded-full object-cover shadow-xl ring-4 ring-emerald-500/20 group-hover:scale-105 transition-transform bg-white"
+                        />
+                        <span className="text-xs text-emerald-800 font-bold uppercase tracking-wider mt-2">Garden Centre</span>
+                    </Link>
                 </div>
 
                 <div className="text-center mb-8">

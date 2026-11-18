@@ -5,9 +5,11 @@ const PlantGuaranteeCard = ({ className = '' }) => {
         <div className={`glass rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-gradient-to-br from-white/95 via-emerald-50/30 to-teal-50/40 shadow-sm ${className}`}>
             <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-emerald-100">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                        <Leaf className="w-5 h-5" />
-                    </div>
+                    <img
+                        src="/logo.png"
+                        alt="Green Petals Garden Centre"
+                        className="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-emerald-500/30 bg-white flex-shrink-0"
+                    />
                     <div>
                         <h3 className="font-extrabold text-sm sm:text-base text-gray-900 tracking-tight">
                             Green Petals Plant Guarantee & Care
